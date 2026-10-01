@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Teal & Charcoal — neutral charcoal-gray surfaces (cool undertone), one shade
+   lighter than pure black so dark mode never reads as pitch black. */
+@theme {
+  --color-coal-50: #f6f8f8;
+  --color-coal-100: #eaeeee;
+  --color-coal-200: #dbe1e1;
+  --color-coal-300: #c2cbcb;
+  --color-coal-700: #3f4546;
+  --color-coal-800: #2c3132;
+  --color-coal-900: #222627;
+  --color-coal-950: #1c1e1e;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 html,
@@ -16,21 +29,21 @@ html {
 
 /* Light mode (default) */
 body {
-  background-color: #fafafa;
-  color: #18181b;
+  background-color: #f6f8f8;
+  color: #182022;
   font-size: 15px;
   line-height: 1.5;
 }
 
 /* Dark mode */
 .dark body {
-  background-color: #09090b;
-  color: #fafafa;
+  background-color: #1c1e1e;
+  color: #f2f5f5;
 }
 
 ::selection {
-  background: #f97316;
-  color: #09090b;
+  background: #0d9488;
+  color: #ffffff;
 }
 
 /* Scrollbar */
@@ -39,17 +52,23 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f4f5;
+  background: #eaeeee;
 }
 .dark ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #1c1e1e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #b7c2c2;
   border-radius: 9999px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: #14b8a6;
+}
 .dark ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #3f4546;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #0d9488;
 }
 
 /* Range slider */
@@ -69,17 +88,17 @@ body {
   width: 15px;
   height: 15px;
   border-radius: 9999px;
-  background: #f97316;
+  background: #0d9488;
   border: 2px solid #f5f5f4;
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.18);
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.18);
 }
 .range-thumb::-moz-range-thumb {
   pointer-events: auto;
   width: 15px;
   height: 15px;
   border-radius: 9999px;
-  background: #f97316;
+  background: #0d9488;
   border: 2px solid #f5f5f4;
   cursor: pointer;
 }
@@ -109,8 +128,8 @@ html {
 }
 
 @keyframes foodworld-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45); }
-  50% { box-shadow: 0 0 0 6px rgba(249, 115, 22, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
 }
 
 .animate-fade-up {
@@ -140,13 +159,17 @@ button, a {
 button, input, textarea, select { font: inherit; }
 
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-  outline: 3px solid rgba(249, 115, 22, 0.45);
+  outline: 3px solid rgba(13, 148, 136, 0.45);
   outline-offset: 2px;
 }
 
+.dark button:focus-visible, .dark a:focus-visible, .dark input:focus-visible, .dark textarea:focus-visible, .dark select:focus-visible {
+  outline-color: rgba(45, 212, 191, 0.6);
+}
+
 button:disabled { cursor: not-allowed; }
-img { background-color: #f4f4f5; }
-.dark img { background-color: #27272a; }
+img { background-color: #eaeeee; }
+.dark img { background-color: #2c3132; }
 
 .fw-container { width: min(100% - 2rem, 80rem); margin-inline: auto; }
 @media (min-width: 640px) { .fw-container { width: min(100% - 3rem, 80rem); } }

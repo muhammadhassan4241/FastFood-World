@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MapPin,
   Wallet,
@@ -31,10 +31,25 @@ function CheckoutPage({
   goToMenu,
   onPlaceOrder,
   onGoToTracking,
+  customer,
 }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(() => customer?.user_metadata?.full_name || "");
+  const [phone, setPhone] = useState(() => customer?.user_metadata?.phone || "");
+  const [email, setEmail] = useState(() => customer?.email || "");
+
+  useEffect(() => {
+    if (customer) {
+      if (!name && customer.user_metadata?.full_name) {
+        setName(customer.user_metadata.full_name);
+      }
+      if (!email && customer.email) {
+        setEmail(customer.email);
+      }
+      if (!phone && customer.user_metadata?.phone) {
+        setPhone(customer.user_metadata.phone);
+      }
+    }
+  }, [customer]);
   const [address, setAddress] = useState("");
   const [instructions, setInstructions] = useState("");
   const [payment, setPayment] = useState("cod");
@@ -84,7 +99,9 @@ function CheckoutPage({
   const tax = Math.round(subtotal * TAX_RATE);
   const grandTotal = subtotal + DELIVERY_CHARGE + tax;
 
-  const canPlaceOrder = name.trim() && phone.trim() && address.trim() && normalizedCartItems.length > 0;
+  const phoneValid = /^[0-9+\-\s()]{7,15}$/.test(phone.trim());
+  const emailValid = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const canPlaceOrder = name.trim() && phoneValid && emailValid && address.trim() && normalizedCartItems.length > 0;
 
   const handlePlaceOrder = async () => {
     if (!canPlaceOrder || isSubmitting) return;
@@ -124,7 +141,7 @@ function CheckoutPage({
             particleCount: 80,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ["#f97316", "#fbbf24", "#34d399", "#60a5fa"],
+            colors: ["#0d9488", "#14b8a6", "#5eead4", "#ffffff", "#cbd5e1"],
           });
         } catch {
           // ignore
@@ -148,7 +165,7 @@ function CheckoutPage({
         <p className="text-zinc-500 dark:text-zinc-400 mb-8">Add a few delicious dishes before heading to checkout.</p>
         <button
           onClick={goToMenu}
-          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-full px-7 py-3.5 transition-colors shadow-lg shadow-orange-500/25"
+          className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-full px-7 py-3.5 transition-colors shadow-lg shadow-teal-500/25"
         >
           Browse menu
         </button>
@@ -167,11 +184,11 @@ function CheckoutPage({
       <div className="px-4 py-12 sm:px-6 md:px-10 animate-fade-up">
         <div className="mx-auto max-w-2xl text-center">
           {/* Animated Success Badge */}
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-orange-500 text-white shadow-2xl shadow-orange-500/30 animate-bounce">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-teal-600 text-white shadow-2xl shadow-teal-500/30 animate-bounce">
             <Check size={36} strokeWidth={3} />
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] text-teal-700 dark:text-teal-400">
             <Sparkles size={13} /> Order Confirmed
           </div>
 
@@ -183,13 +200,13 @@ function CheckoutPage({
           </p>
 
           {/* Order Summary & QR Code Card */}
-          <div className="mt-8 rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+          <div className="mt-8 rounded-3xl border border-coal-200 bg-white p-6 shadow-xl dark:border-coal-800 dark:bg-coal-900 sm:p-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 items-center text-left">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
                   Unique Order ID
                 </span>
-                <p className="font-mono text-2xl font-black text-orange-500">
+                <p className="font-mono text-2xl font-black text-teal-600 dark:text-teal-400">
                   {orderIdDisplay}
                 </p>
 
@@ -198,14 +215,14 @@ function CheckoutPage({
                   <p><span className="font-bold text-zinc-900 dark:text-white">Phone:</span> {placedOrder.mobile || placedOrder.customer_phone}</p>
                   <p><span className="font-bold text-zinc-900 dark:text-white">Payment:</span> {placedOrder.payment_method === "card" ? "Credit/Debit Card" : "Cash on Delivery"}</p>
                   <p className="text-sm font-black text-zinc-900 dark:text-white pt-1">
-                    Total: <span className="text-orange-500">{formatCurrency(placedOrder.total_amount || placedOrder.total)}</span>
+                    Total: <span className="text-teal-600 dark:text-teal-400">{formatCurrency(placedOrder.total_amount || placedOrder.total)}</span>
                   </p>
                 </div>
               </div>
 
               {/* QR Code Container */}
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-zinc-50 p-4 text-center dark:bg-zinc-950/60">
-                <div className="rounded-xl border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700">
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-coal-50 p-4 text-center dark:bg-coal-950/60">
+                <div className="rounded-xl border border-coal-200 bg-white p-2 shadow-sm dark:border-coal-700">
                   <QRCodeSVG
                     value={trackingUrl}
                     size={90}
@@ -223,15 +240,15 @@ function CheckoutPage({
             <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 onClick={() => setReceiptModalOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white py-3.5 text-xs font-black text-zinc-800 shadow-sm transition hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-coal-200 bg-white py-3.5 text-xs font-black text-zinc-800 shadow-sm transition hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:bg-coal-800 dark:text-zinc-200"
               >
-                <Receipt size={16} className="text-orange-500" />
+                <Receipt size={16} className="text-teal-600 dark:text-teal-400" />
                 <span>View & Print Receipt</span>
               </button>
 
               <button
                 onClick={() => onGoToTracking(placedOrder.order_id || String(placedOrder.id))}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 py-3.5 text-xs font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-400"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 py-3.5 text-xs font-black text-white shadow-lg shadow-teal-500/25 transition hover:bg-teal-700"
               >
                 <span>Track Live Status</span>
                 <ArrowRight size={16} />
@@ -242,7 +259,7 @@ function CheckoutPage({
           <div className="mt-6">
             <button
               onClick={goToMenu}
-              className="text-xs font-bold text-zinc-500 hover:text-orange-500"
+              className="text-xs font-bold text-zinc-500 hover:text-teal-600 dark:hover:text-teal-400"
             >
               ← Order something else
             </button>
@@ -267,7 +284,7 @@ function CheckoutPage({
     <div className="px-5 md:px-10 py-8 animate-fade-up">
       <button
         onClick={goToMenu}
-        className="flex items-center gap-1 text-sm text-zinc-500 hover:text-orange-500 transition-colors mb-3 font-semibold"
+        className="flex items-center gap-1 text-sm text-zinc-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors mb-3 font-semibold"
       >
         <ChevronLeft size={16} /> Back to menu
       </button>
@@ -290,7 +307,7 @@ function CheckoutPage({
         {/* Left - Form */}
         <div className="lg:col-span-7 flex flex-col gap-5">
           {/* Contact */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-coal-900 border border-coal-200 dark:border-coal-800 rounded-3xl p-6 shadow-sm">
             <h3 className="font-black text-zinc-900 dark:text-white mb-4">Contact Information</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -299,13 +316,15 @@ function CheckoutPage({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
+                  className="w-full bg-coal-50 dark:bg-coal-950 border border-coal-200 dark:border-coal-700 rounded-2xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-teal-500"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-zinc-500 mb-1.5 block">Mobile Number *</label>
-                <div className="flex items-center bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-3 focus-within:border-orange-500">
-                  <span className="text-sm font-semibold text-zinc-500 pr-2 border-r border-zinc-200 dark:border-zinc-700">+92</span>
+                <div className={`flex items-center bg-coal-50 dark:bg-coal-950 border rounded-2xl px-3 focus-within:border-teal-500 ${
+                  phone.trim() && !phoneValid ? "border-red-400" : "border-coal-200 dark:border-coal-700"
+                }`}>
+                  <span className="text-sm font-semibold text-zinc-500 pr-2 border-r border-coal-200 dark:border-coal-700">+92</span>
                   <input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -313,6 +332,9 @@ function CheckoutPage({
                     className="w-full bg-transparent px-2 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none"
                   />
                 </div>
+                {phone.trim() && !phoneValid && (
+                  <p className="mt-1 text-[11px] text-red-500">Please enter a valid phone number (7–15 digits).</p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold text-zinc-500 mb-1.5 block">Email Address (Optional)</label>
@@ -320,14 +342,19 @@ function CheckoutPage({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
+                  className={`w-full bg-coal-50 dark:bg-coal-950 border rounded-2xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-teal-500 ${
+                    email.trim() && !emailValid ? "border-red-400" : "border-coal-200 dark:border-coal-700"
+                  }`}
                 />
+                {email.trim() && !emailValid && (
+                  <p className="mt-1 text-[11px] text-red-500">Please enter a valid email address.</p>
+                )}
               </div>
             </div>
           </div>
 
           {/* Address */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-coal-900 border border-coal-200 dark:border-coal-800 rounded-3xl p-6 shadow-sm">
             <h3 className="font-black text-zinc-900 dark:text-white mb-4">Delivery Address *</h3>
             <div className="relative">
               <MapPin size={16} className="absolute left-3.5 top-3.5 text-zinc-400" />
@@ -336,13 +363,13 @@ function CheckoutPage({
                 onChange={(e) => setAddress(e.target.value)}
                 rows={2}
                 placeholder="House #, street, building, area, city..."
-                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl pl-10 pr-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500 resize-none"
+                className="w-full bg-coal-50 dark:bg-coal-950 border border-coal-200 dark:border-coal-700 rounded-2xl pl-10 pr-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-teal-500 resize-none"
               />
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-coal-900 border border-coal-200 dark:border-coal-800 rounded-3xl p-6 shadow-sm">
             <h3 className="font-black text-zinc-900 dark:text-white mb-4">
               Special Kitchen Instructions <span className="text-zinc-400 text-xs font-normal">(Optional)</span>
             </h3>
@@ -351,12 +378,12 @@ function CheckoutPage({
               onChange={(e) => setInstructions(e.target.value)}
               rows={3}
               placeholder="Add any comment for the chef e.g. extra spicy, no onions, or gate delivery instructions."
-              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500 resize-none"
+              className="w-full bg-coal-50 dark:bg-coal-950 border border-coal-200 dark:border-coal-700 rounded-2xl px-3.5 py-2.5 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-teal-500 resize-none"
             />
           </div>
 
           {/* Payment */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-coal-900 border border-coal-200 dark:border-coal-800 rounded-3xl p-6 shadow-sm">
             <h3 className="font-black text-zinc-900 dark:text-white mb-4">Select Payment Method</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
@@ -364,11 +391,11 @@ function CheckoutPage({
                 onClick={() => setPayment("cod")}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 border transition-all ${
                   payment === "cod"
-                    ? "border-orange-500 bg-orange-500/10 shadow-sm"
-                    : "border-zinc-200 dark:border-zinc-700 hover:border-orange-500/50"
+                    ? "border-teal-500 bg-teal-500/10 shadow-sm"
+                    : "border-coal-200 dark:border-coal-700 hover:border-teal-500/50"
                 }`}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-500">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400">
                   <Wallet size={18} />
                 </div>
                 <div className="text-left">
@@ -382,11 +409,11 @@ function CheckoutPage({
                 onClick={() => setPayment("card")}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 border transition-all ${
                   payment === "card"
-                    ? "border-orange-500 bg-orange-500/10 shadow-sm"
-                    : "border-zinc-200 dark:border-zinc-700 hover:border-orange-500/50"
+                    ? "border-teal-500 bg-teal-500/10 shadow-sm"
+                    : "border-coal-200 dark:border-coal-700 hover:border-teal-500/50"
                 }`}
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-500">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400">
                   <CreditCard size={18} />
                 </div>
                 <div className="text-left">
@@ -400,8 +427,8 @@ function CheckoutPage({
 
         {/* Right - Summary */}
         <div className="lg:col-span-5">
-          <div className="lg:sticky lg:top-24 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
-            <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="lg:sticky lg:top-24 bg-white dark:bg-coal-900 border border-coal-200 dark:border-coal-800 rounded-3xl overflow-hidden shadow-sm">
+            <div className="px-6 py-5 border-b border-coal-200 dark:border-coal-800">
               <h2 className="text-lg font-black text-zinc-900 dark:text-white">Your Cart Summary</h2>
             </div>
 
@@ -411,7 +438,7 @@ function CheckoutPage({
                   {item.image ? (
                     <img src={item.image} alt={item.title} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 font-black shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 font-black shrink-0">
                       F
                     </div>
                   )}
@@ -419,11 +446,11 @@ function CheckoutPage({
                     <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">{item.title}</p>
                     <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Drink:{" "}
-                      <span className={item.drink ? "text-orange-500 font-bold" : "text-zinc-400"}>
+                      <span className={item.drink ? "text-teal-600 dark:text-teal-400 font-bold" : "text-zinc-400"}>
                         {item.drink ? `${item.drink_name} (+Rs. ${item.drink_price})` : "No Drink"}
                       </span>
                     </p>
-                    <p className="text-xs text-orange-500 mt-0.5 font-bold">
+                    <p className="text-xs text-teal-600 dark:text-teal-400 mt-0.5 font-bold">
                       {formatCurrency(item.price * item.quantity)}
                     </p>
                   </div>
@@ -439,13 +466,13 @@ function CheckoutPage({
             <div className="px-6">
               <button
                 onClick={goToMenu}
-                className="text-xs text-orange-500 font-bold hover:underline"
+                className="text-xs text-teal-600 dark:text-teal-400 font-bold hover:underline"
               >
                 + Add more items
               </button>
             </div>
 
-            <div className="px-6 py-5 mt-2 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="px-6 py-5 mt-2 border-t border-coal-200 dark:border-coal-800">
               <div className="flex flex-col gap-2.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Subtotal</span>
@@ -460,15 +487,15 @@ function CheckoutPage({
                   <span className="font-bold text-zinc-900 dark:text-white">{formatCurrency(tax)}</span>
                 </div>
 
-                <div className="flex justify-between pt-3 mt-1 border-t border-zinc-200 dark:border-zinc-800 text-sm">
+                <div className="flex justify-between pt-3 mt-1 border-t border-coal-200 dark:border-coal-800 text-sm">
                   <span className="font-black text-zinc-900 dark:text-white">Grand total</span>
-                  <span className="text-lg font-black text-orange-500">{formatCurrency(grandTotal)}</span>
+                  <span className="text-lg font-black text-teal-600 dark:text-teal-400">{formatCurrency(grandTotal)}</span>
                 </div>
 
                 <button
                   onClick={handlePlaceOrder}
                   disabled={!canPlaceOrder || isSubmitting}
-                  className="mt-4 w-full bg-orange-500 hover:bg-orange-400 text-white font-black rounded-full py-4 transition-all shadow-xl shadow-orange-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white font-black rounded-full py-4 transition-all shadow-xl shadow-teal-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Placing Order in Database..." : `Place Order • ${formatCurrency(grandTotal)}`}
                 </button>

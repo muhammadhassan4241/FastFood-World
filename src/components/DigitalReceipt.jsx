@@ -74,7 +74,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
         <div className="no-print mb-4 flex flex-wrap items-center justify-center gap-2.5">
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-orange-500 dark:bg-white dark:text-zinc-900 dark:hover:bg-orange-500 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full bg-coal-900 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-teal-600 dark:bg-white dark:text-zinc-900 dark:hover:bg-teal-600 dark:hover:text-white"
           >
             <Printer size={14} />
             <span>Print Receipt</span>
@@ -83,7 +83,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
           <button
             disabled={downloading}
             onClick={handleDownloadPDF}
-            className="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-400 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-500/20 transition hover:bg-teal-700 disabled:opacity-50"
           >
             <Download size={14} />
             <span>{downloading ? "Preparing PDF..." : "Download PDF"}</span>
@@ -91,7 +91,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
 
           <button
             onClick={handleCopyLink}
-            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-xs font-bold text-zinc-700 transition hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+            className="inline-flex items-center gap-1.5 rounded-full border border-coal-200 bg-white px-3.5 py-2 text-xs font-bold text-zinc-700 transition hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:bg-coal-900 dark:text-zinc-300"
           >
             {copied ? <Check size={14} className="text-emerald-500" /> : <ShieldCheck size={14} />}
             <span>{copied ? "Link Copied!" : "Copy Order Link"}</span>
@@ -103,15 +103,15 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
       <div className="print-area w-full max-w-md">
         <div
           ref={receiptRef}
-          className="receipt-card relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 text-zinc-900 shadow-xl transition-all dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 sm:p-8"
+          className="receipt-card relative overflow-hidden rounded-3xl border border-coal-200 bg-white p-6 text-zinc-900 shadow-xl transition-all dark:border-coal-800 dark:bg-coal-900 dark:text-zinc-100 sm:p-8"
         >
           {/* Header Brand */}
-          <div className="border-b border-dashed border-zinc-200 pb-5 text-center dark:border-zinc-800">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-xl font-black text-white shadow-lg shadow-orange-500/20">
+          <div className="border-b border-dashed border-coal-200 pb-5 text-center dark:border-coal-800">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-coal-900 text-white text-xl font-black shadow-lg shadow-teal-500/20">
               F
             </div>
             <h2 className="text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
-              FOOD <span className="text-orange-500">WORLD</span>
+              FOOD <span className="text-teal-600 dark:text-teal-400">WORLD</span>
             </h2>
             <p className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
               Digital Official Receipt
@@ -122,12 +122,12 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
           </div>
 
           {/* Metadata Grid */}
-          <div className="my-4 grid grid-cols-2 gap-3 border-b border-dashed border-zinc-200 pb-4 text-xs dark:border-zinc-800">
+          <div className="my-4 grid grid-cols-2 gap-3 border-b border-dashed border-coal-200 pb-4 text-xs dark:border-coal-800">
             <div>
               <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 Order ID
               </span>
-              <span className="font-mono text-sm font-black text-orange-600 dark:text-orange-400">
+              <span className="font-mono text-sm font-black text-teal-600 dark:text-teal-400">
                 {orderIdText}
               </span>
             </div>
@@ -163,7 +163,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
           </div>
 
           {/* Customer Details */}
-          <div className="mb-4 rounded-2xl bg-zinc-50 p-3.5 text-xs dark:bg-zinc-950/60">
+          <div className="mb-4 rounded-2xl bg-coal-50 p-3.5 text-xs dark:bg-coal-950/60">
             <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
               Customer Information
             </p>
@@ -172,18 +172,18 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
             </p>
             {normalized.mobile && (
               <p className="mt-0.5 flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
-                <Phone size={12} className="text-orange-500" />
+                <Phone size={12} className="text-teal-600 dark:text-teal-400" />
                 {normalized.mobile}
               </p>
             )}
             {normalized.address && (
               <p className="mt-0.5 flex items-start gap-1.5 text-zinc-600 dark:text-zinc-400">
-                <MapPin size={12} className="mt-0.5 shrink-0 text-orange-500" />
+                <MapPin size={12} className="mt-0.5 shrink-0 text-teal-600 dark:text-teal-400" />
                 <span className="line-clamp-2">{normalized.address}</span>
               </p>
             )}
             {normalized.special_instructions && (
-              <p className="mt-1.5 rounded-lg bg-orange-500/10 px-2 py-1 text-[11px] font-medium text-orange-600 dark:text-orange-400">
+              <p className="mt-1.5 rounded-lg bg-teal-500/10 px-2 py-1 text-[11px] font-medium text-teal-600 dark:text-teal-400">
                 Note: {normalized.special_instructions}
               </p>
             )}
@@ -218,7 +218,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
           </div>
 
           {/* Pricing Calculation Summary */}
-          <div className="border-t border-dashed border-zinc-200 pt-3 text-xs dark:border-zinc-800">
+          <div className="border-t border-dashed border-coal-200 pt-3 text-xs dark:border-coal-800">
             <div className="flex justify-between py-1 text-zinc-500 dark:text-zinc-400">
               <span>Subtotal</span>
               <span className="font-medium text-zinc-900 dark:text-white">{formatCurrency(normalized.subtotal)}</span>
@@ -237,15 +237,15 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
                 <span className="font-medium">-{formatCurrency(normalized.discount)}</span>
               </div>
             )}
-            <div className="mt-2 flex items-baseline justify-between border-t border-zinc-200 pt-2.5 dark:border-zinc-800">
+            <div className="mt-2 flex items-baseline justify-between border-t border-coal-200 pt-2.5 dark:border-coal-800">
               <span className="text-sm font-black text-zinc-900 dark:text-white">Grand Total</span>
-              <span className="text-lg font-black text-orange-500">{formatCurrency(normalized.total_amount)}</span>
+              <span className="text-lg font-black text-teal-600 dark:text-teal-400">{formatCurrency(normalized.total_amount)}</span>
             </div>
           </div>
 
           {/* QR Code & Verification */}
-          <div className="mt-6 flex flex-col items-center justify-center border-t border-dashed border-zinc-200 pt-5 text-center dark:border-zinc-800">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-sm dark:border-zinc-700">
+          <div className="mt-6 flex flex-col items-center justify-center border-t border-dashed border-coal-200 pt-5 text-center dark:border-coal-800">
+            <div className="rounded-2xl border border-coal-200 bg-white p-2.5 shadow-sm dark:border-coal-700">
               <QRCodeSVG
                 value={trackingUrl}
                 size={96}
@@ -263,7 +263,7 @@ function DigitalReceipt({ order, products = [], showActions = true }) {
           </div>
 
           {/* Footer note */}
-          <div className="mt-5 border-t border-zinc-100 pt-3 text-center text-[10px] text-zinc-400 dark:border-zinc-800">
+          <div className="mt-5 border-t border-coal-100 pt-3 text-center text-[10px] text-zinc-400 dark:border-coal-800">
             <p className="font-semibold text-zinc-500 dark:text-zinc-400">
               Thank you for dining with Food World!
             </p>

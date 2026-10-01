@@ -16,10 +16,8 @@ import {
 } from "lucide-react";
 import { supabase } from "../supabaseClient";
 
-const OWNER_EMAIL = "muhammadhassanattari450@gmail.com";
-
 function OwnerLogin({ onLoggedIn, onBack }) {
-  const [email, setEmail] = useState("muhammadhassanattari450@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,11 +41,10 @@ function OwnerLogin({ onLoggedIn, onBack }) {
 
       if (authError) {
         setError(authError.message || "Failed to sign in. Please check your credentials.");
-      } else if (data.user?.email?.toLowerCase() !== OWNER_EMAIL.toLowerCase()) {
-        await supabase.auth.signOut();
-        setError("This account is not authorized for the Food World Owner Portal.");
-      } else {
+      } else if (data?.user) {
         onLoggedIn(data.user);
+      } else {
+        setError("Sign in failed. Please try again.");
       }
     } catch (err) {
       setError(err?.message || "An unexpected network error occurred.");
@@ -56,34 +53,35 @@ function OwnerLogin({ onLoggedIn, onBack }) {
     }
   };
 
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-zinc-950 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-coal-950 px-4 py-8 sm:px-6 lg:px-8">
       {/* Dynamic Ambient Background Glows */}
-      <div className="pointer-events-none fixed -left-36 -top-36 h-[32rem] w-[32rem] rounded-full bg-orange-600/20 blur-[120px]" />
-      <div className="pointer-events-none fixed -bottom-36 -right-36 h-[32rem] w-[32rem] rounded-full bg-amber-500/15 blur-[120px]" />
-      <div className="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-orange-500/5 blur-[100px]" />
+      <div className="pointer-events-none fixed -left-36 -top-36 h-[32rem] w-[32rem] rounded-full bg-teal-500/20 blur-[120px]" />
+      <div className="pointer-events-none fixed -bottom-36 -right-36 h-[32rem] w-[32rem] rounded-full bg-zinc-500/10 blur-[120px]" />
+      <div className="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-teal-500/5 blur-[100px]" />
 
       {/* Main Container Card */}
-      <div className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/80 backdrop-blur-2xl transition-all">
+      <div className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-coal-900/70 shadow-2xl shadow-black/80 backdrop-blur-2xl transition-all">
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Left Visual / Hero Section */}
-          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 p-8 text-white sm:p-12 lg:col-span-6">
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-coal-900 via-teal-800 to-teal-600 p-8 text-white sm:p-12 lg:col-span-6">
             {/* Background Pattern */}
             <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
-            <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-orange-950/25 blur-2xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-teal-400/15 blur-2xl" />
 
             {/* Top Brand Bar */}
             <div className="relative z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 font-black text-white shadow-xl">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-coal-900 text-white text-lg font-black shadow-xl">
                     F
                   </div>
                   <div>
-                    <h2 className="text-xl font-black tracking-tight text-zinc-950">
-                      FOOD <span className="text-white">WORLD</span>
+                    <h2 className="text-xl font-black tracking-tight text-white">
+                      FOOD <span className="text-teal-300">WORLD</span>
                     </h2>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-zinc-950/70">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-white/75">
                       Enterprise POS & Kitchen OS
                     </p>
                   </div>
@@ -92,7 +90,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
                 {onBack && (
                   <button
                     onClick={onBack}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-zinc-950/20 px-3.5 py-1.5 text-xs font-bold text-zinc-950 transition hover:bg-zinc-950 hover:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-white hover:text-teal-700"
                   >
                     <Store size={14} />
                     <span>Storefront</span>
@@ -102,43 +100,43 @@ function OwnerLogin({ onLoggedIn, onBack }) {
 
               {/* Tagline */}
               <div className="mt-8">
-                <div className="inline-flex items-center gap-2 rounded-full bg-zinc-950/20 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-zinc-950 backdrop-blur-md">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-white backdrop-blur-md">
                   <Sparkles size={13} />
                   <span>Restaurant Operations Portal</span>
                 </div>
-                <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight text-zinc-950 sm:text-4xl">
+                <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl">
                   Powering fresh bites & real-time kitchen efficiency.
                 </h1>
-                <p className="mt-3 text-sm font-medium leading-relaxed text-zinc-950/80">
+                <p className="mt-3 text-sm font-medium leading-relaxed text-white/85">
                   Manage food & drink orders, configure menu pricing, monitor stock thresholds, and track live restaurant revenue in one unified terminal.
                 </p>
               </div>
             </div>
 
             {/* Live Feature Highlights Pill Grid */}
-            <div className="relative z-10 mt-8 grid grid-cols-3 gap-3 pt-6 border-t border-zinc-950/15">
-              <div className="rounded-2xl bg-zinc-950/15 p-3 backdrop-blur-md">
-                <div className="flex items-center gap-1.5 text-zinc-950">
+            <div className="relative z-10 mt-8 grid grid-cols-3 gap-3 pt-6 border-t border-white/20">
+              <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-md">
+                <div className="flex items-center gap-1.5 text-white">
                   <ChefHat size={16} />
                   <span className="text-xs font-bold">KDS</span>
                 </div>
-                <p className="mt-1 text-[11px] font-semibold text-zinc-950/70">Live cooking queue</p>
+                <p className="mt-1 text-[11px] font-semibold text-white/75">Live cooking queue</p>
               </div>
 
-              <div className="rounded-2xl bg-zinc-950/15 p-3 backdrop-blur-md">
-                <div className="flex items-center gap-1.5 text-zinc-950">
+              <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-md">
+                <div className="flex items-center gap-1.5 text-white">
                   <TrendingUp size={16} />
                   <span className="text-xs font-bold">Sales</span>
                 </div>
-                <p className="mt-1 text-[11px] font-semibold text-zinc-950/70">Real-time revenue</p>
+                <p className="mt-1 text-[11px] font-semibold text-white/75">Real-time revenue</p>
               </div>
 
-              <div className="rounded-2xl bg-zinc-950/15 p-3 backdrop-blur-md">
-                <div className="flex items-center gap-1.5 text-zinc-950">
+              <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-md">
+                <div className="flex items-center gap-1.5 text-white">
                   <Receipt size={16} />
                   <span className="text-xs font-bold">POS</span>
                 </div>
-                <p className="mt-1 text-[11px] font-semibold text-zinc-950/70">Print receipts</p>
+                <p className="mt-1 text-[11px] font-semibold text-white/75">Print receipts</p>
               </div>
             </div>
           </div>
@@ -149,17 +147,17 @@ function OwnerLogin({ onLoggedIn, onBack }) {
               {/* Top return link on mobile */}
               <div className="mb-6 flex items-center justify-between lg:hidden">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-500 text-sm font-black text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-coal-900 text-white text-sm font-black">
                     F
                   </span>
                   <span className="text-sm font-black text-white">
-                    FOOD <span className="text-orange-500">WORLD</span>
+                    FOOD <span className="text-teal-300">WORLD</span>
                   </span>
                 </div>
                 {onBack && (
                   <button
                     onClick={onBack}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-orange-500"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-teal-200"
                   >
                     <ArrowLeft size={14} />
                     <span>Back to Store</span>
@@ -169,7 +167,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
 
               {/* Header */}
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-400">
+                <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-white/10 px-3 py-1 text-xs font-bold text-teal-200">
                   <ShieldCheck size={14} />
                   <span>Owner Authentication</span>
                 </div>
@@ -207,7 +205,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="owner@foodworld.com"
-                      className="w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 py-3.5 pl-11 pr-4 text-sm font-medium text-white outline-none transition placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                      className="w-full rounded-2xl border border-coal-800 bg-coal-950/80 py-3.5 pl-11 pr-4 text-sm font-medium text-white outline-none transition placeholder:text-zinc-600 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                     />
                   </div>
                 </div>
@@ -231,7 +229,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 py-3.5 pl-11 pr-11 text-sm font-medium text-white outline-none transition placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                      className="w-full rounded-2xl border border-coal-800 bg-coal-950/80 py-3.5 pl-11 pr-11 text-sm font-medium text-white outline-none transition placeholder:text-zinc-600 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                     />
                     <button
                       type="button"
@@ -248,7 +246,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 py-4 text-sm font-black text-white shadow-xl shadow-orange-500/25 transition duration-300 hover:bg-orange-400 hover:shadow-orange-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 py-4 text-sm font-black text-white shadow-xl shadow-teal-500/25 transition duration-300 hover:bg-teal-700 hover:shadow-teal-500/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? (
                     <>
@@ -266,14 +264,14 @@ function OwnerLogin({ onLoggedIn, onBack }) {
             </div>
 
             {/* Bottom Footer & Store Return */}
-            <div className="mt-8 border-t border-zinc-800/80 pt-5 text-center text-xs text-zinc-500">
+            <div className="mt-8 border-t border-coal-800/80 pt-5 text-center text-xs text-zinc-500">
               <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
                 <p>Protected by Food World Supabase Auth</p>
                 {onBack && (
                   <button
                     type="button"
                     onClick={onBack}
-                    className="inline-flex items-center gap-1 font-bold text-orange-500 hover:underline"
+                    className="inline-flex items-center gap-1 font-bold text-teal-300 hover:underline"
                   >
                     <ArrowLeft size={13} />
                     <span>Return to Customer Store</span>

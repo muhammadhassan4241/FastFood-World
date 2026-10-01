@@ -34,30 +34,33 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
 
   const normalizedOrders = orders.map((o) => normalizeOrder(o, products));
 
-  const filteredOrders = normalizedOrders.filter((order) => {
-    const rawStatus = (order.status || "pending").toLowerCase();
-    const matchesStatus =
-      filterStatus === "all"
-        ? true
-        : filterStatus === "completed"
-        ? rawStatus === "completed" || rawStatus === "delivered"
-        : rawStatus === filterStatus;
+  const filteredOrders = normalizedOrders
+    .filter((order) => {
+      const rawStatus = (order.status || "pending").toLowerCase();
+      const matchesStatus =
+        filterStatus === "all"
+          ? true
+          : filterStatus === "completed"
+          ? rawStatus === "completed" || rawStatus === "delivered"
+          : rawStatus === filterStatus;
 
-    const idStr = String(order.id || "");
-    const orderIdStr = String(order.order_id || "");
-    const customerStr = String(order.customer_name || "");
-    const phoneStr = String(order.mobile || "");
-    const query = searchQuery.toLowerCase();
+      const idStr = String(order.id || "");
+      const orderIdStr = String(order.order_id || "");
+      const customerStr = String(order.customer_name || "");
+      const phoneStr = String(order.mobile || "");
+      const query = searchQuery.toLowerCase();
 
-    const matchesSearch =
-      !searchQuery ||
-      idStr.includes(query) ||
-      orderIdStr.toLowerCase().includes(query) ||
-      customerStr.toLowerCase().includes(query) ||
-      phoneStr.includes(query);
+      const matchesSearch =
+        !searchQuery ||
+        idStr.includes(query) ||
+        orderIdStr.toLowerCase().includes(query) ||
+        customerStr.toLowerCase().includes(query) ||
+        phoneStr.includes(query);
 
-    return matchesStatus && matchesSearch;
-  });
+      return matchesStatus && matchesSearch;
+    })
+    // FIFO: oldest orders first so kitchen processes them in arrival order
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
   const getStatusCount = (statusKey) => {
     if (statusKey === "all") return normalizedOrders.length;
@@ -75,7 +78,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white">
               <Flame size={16} />
             </span>
             <h2 className="text-2xl font-black text-zinc-900 dark:text-white">
@@ -83,7 +86,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
             </h2>
           </div>
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Real-time kitchen queue. Update cooking progress and keep orders moving fast.
+            Real-time kitchen queue · <span className="font-bold text-teal-600 dark:text-teal-400">Oldest first · FIFO</span> — process top-left orders first.
           </p>
         </div>
 
@@ -95,7 +98,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search order #, customer, phone..."
-            className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900"
+            className="w-full rounded-xl border border-coal-200 bg-white py-2.5 pl-9 pr-3 text-xs outline-none focus:border-teal-500 dark:border-coal-800 dark:bg-coal-900"
           />
         </div>
       </div>
@@ -111,14 +114,14 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
               onClick={() => setFilterStatus(tab.id)}
               className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition duration-200 ${
                 active
-                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
-                  : "border border-zinc-200 bg-white text-zinc-600 hover:border-orange-500/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+                  ? "bg-teal-600 text-white shadow-md shadow-teal-500/20"
+                  : "border border-coal-200 bg-white text-zinc-600 hover:border-teal-500/50 dark:border-coal-800 dark:bg-coal-900 dark:text-zinc-400"
               }`}
             >
               <span>{tab.label}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                  active ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                  active ? "bg-white/20 text-white" : "bg-coal-100 text-zinc-700 dark:bg-coal-800 dark:text-zinc-300"
                 }`}
               >
                 {count}
@@ -139,14 +142,14 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
           return (
             <div
               key={order.id}
-              className={`flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-sm transition hover:shadow-lg dark:bg-zinc-900 ${
+              className={`flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-sm transition hover:shadow-lg dark:bg-coal-900 ${
                 statusKey === "pending"
                   ? "border-amber-500/40 dark:border-amber-500/30"
                   : statusKey === "preparing"
                   ? "border-blue-500/40 dark:border-blue-500/30"
                   : statusKey === "ready"
                   ? "border-teal-500/40 dark:border-teal-500/30"
-                  : "border-zinc-200 dark:border-zinc-800"
+                  : "border-coal-200 dark:border-coal-800"
               }`}
             >
               {/* Order Card Header */}
@@ -154,7 +157,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-base font-black text-orange-600 dark:text-orange-400">
+                      <span className="font-mono text-base font-black text-teal-600 dark:text-teal-400">
                         {orderIdText}
                       </span>
                       <span
@@ -174,7 +177,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
 
                   <button
                     onClick={() => onViewReceipt(order)}
-                    className="rounded-xl border border-zinc-200 p-2 text-zinc-500 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-800"
+                    className="rounded-xl border border-coal-200 p-2 text-zinc-500 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-800"
                     title="View Digital Receipt"
                   >
                     <Receipt size={16} />
@@ -182,7 +185,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
                 </div>
 
                 {/* Customer Info */}
-                <div className="mt-3 rounded-2xl bg-zinc-50 p-3 text-xs dark:bg-zinc-950/60">
+                <div className="mt-3 rounded-2xl bg-coal-50 p-3 text-xs dark:bg-coal-950/60">
                   <div className="flex justify-between">
                     <span className="font-bold text-zinc-900 dark:text-white">
                       {order.customer_name || "Guest Customer"}
@@ -213,10 +216,10 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
                     {items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between rounded-xl bg-zinc-50/70 px-2.5 py-1.5 text-xs dark:bg-zinc-800/40"
+                        className="flex items-center justify-between rounded-xl bg-coal-50/70 px-2.5 py-1.5 text-xs dark:bg-coal-800/40"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-orange-500 text-[10px] font-black text-white">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-teal-600 text-[10px] font-black text-white">
                             {item.quantity}x
                           </span>
                           <span className="font-bold text-zinc-800 dark:text-zinc-200">
@@ -236,10 +239,10 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
               </div>
 
               {/* Action Buttons & Status Advancement */}
-              <div className="mt-5 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <div className="mt-5 border-t border-coal-100 pt-3 dark:border-coal-800">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-zinc-500">Order Total</span>
-                  <span className="font-black text-orange-500">
+                  <span className="font-black text-teal-600 dark:text-teal-400">
                     {formatCurrency(order.total_amount || 0)}
                   </span>
                 </div>
@@ -279,7 +282,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
                   <select
                     value={statusKey}
                     onChange={(e) => onStatusChange(order.id, e.target.value)}
-                    className="rounded-xl border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-xs font-bold text-zinc-700 outline-none hover:border-orange-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                    className="rounded-xl border border-coal-200 bg-coal-50 px-2.5 py-2 text-xs font-bold text-zinc-700 outline-none hover:border-teal-500 dark:border-coal-700 dark:bg-coal-800 dark:text-zinc-300"
                   >
                     <option value="pending">Pending</option>
                     <option value="preparing">Preparing</option>
@@ -309,7 +312,7 @@ function KitchenDisplay({ orders = [], products = [], onStatusChange, onViewRece
       </div>
 
       {filteredOrders.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-zinc-200 p-14 text-center dark:border-zinc-800">
+        <div className="rounded-3xl border border-dashed border-coal-200 p-14 text-center dark:border-coal-800">
           <ChefHat className="mx-auto text-zinc-400" size={36} />
           <h3 className="mt-3 text-base font-black text-zinc-900 dark:text-white">
             No orders in this category

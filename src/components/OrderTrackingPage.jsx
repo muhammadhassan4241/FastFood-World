@@ -125,7 +125,22 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
         }
       }
 
+      // If not found by name/phone, try looking up the order_id text column directly
+      // This covers FW-XXXXX lookups across ALL orders, not just recent 50
+      if (fetchedRows.length === 0) {
+        const { data: orderIdColData, error: orderIdColError } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("order_id", raw.toUpperCase())
+          .limit(1);
+
+        if (!orderIdColError && orderIdColData && orderIdColData.length > 0) {
+          fetchedRows = orderIdColData;
+        }
+      }
+
       // Also try fetching recent orders to match embedded order_id in items JSON
+      // (legacy fallback for old orders created before order_id column was added)
       if (fetchedRows.length === 0) {
         const { data: recentOrders, error: recentError } = await supabase
           .from("orders")
@@ -244,26 +259,25 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
   const trackingUrl = typeof window !== "undefined" && currentOrder
     ? `${window.location.origin}${window.location.pathname}?tracking=${encodeURIComponent(currentOrder.order_id || currentOrder.id)}`
     : "";
-
   return (
     <div className="min-h-[80vh] px-4 py-10 sm:px-6 md:px-10">
       <div className="mx-auto max-w-4xl">
         {/* Title Header */}
         <div className="text-center animate-fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-teal-700 dark:text-teal-400">
             <Sparkles size={14} /> Live Kitchen Tracking
           </div>
           <h1 className="mt-3 text-3xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
-            Track Your <span className="text-orange-500">Order</span>
+            Track Your <span className="text-teal-600 dark:text-teal-400">Order</span>
           </h1>
           <p className="mx-auto mt-3 max-w-lg text-sm text-zinc-500 dark:text-zinc-400">
-            Enter your unique Order ID (e.g. <span className="font-mono font-bold text-orange-500">FW-86712</span>) to see real-time progress.
+            Enter your unique Order ID (e.g. <span className="font-mono font-bold text-teal-600 dark:text-teal-400">FW-86712</span>) to see real-time progress.
           </p>
 
           {/* Search Box */}
           <form
             onSubmit={handleSearchSubmit}
-            className="mx-auto mt-6 flex max-w-xl items-center gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-xl shadow-zinc-200/40 transition focus-within:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none"
+            className="mx-auto mt-6 flex max-w-xl items-center gap-2 rounded-2xl border border-coal-200 bg-white p-2 shadow-xl shadow-coal-300/40 transition focus-within:border-teal-500 dark:border-coal-800 dark:bg-coal-900 dark:shadow-none"
           >
             <div className="flex flex-1 items-center pl-3">
               <Search size={18} className="text-zinc-400" />
@@ -278,7 +292,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
             <button
               type="submit"
               disabled={loading || !searchInput.trim()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500 px-5 py-3 text-xs font-black text-white shadow-md shadow-orange-500/25 transition hover:bg-orange-400 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-5 py-3 text-xs font-black text-white shadow-md shadow-teal-500/25 transition hover:bg-teal-700 disabled:opacity-50"
             >
               {loading ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -304,12 +318,12 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
         {currentOrder && (
           <div className="mt-10 space-y-6 animate-fade-up">
             {/* Status Header Card */}
-            <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
-              <div className="flex flex-col justify-between gap-4 border-b border-zinc-100 pb-6 dark:border-zinc-800 sm:flex-row sm:items-center">
+            <div className="rounded-3xl border border-coal-200 bg-white p-6 shadow-sm dark:border-coal-800 dark:bg-coal-900 sm:p-8">
+              <div className="flex flex-col justify-between gap-4 border-b border-coal-100 pb-6 dark:border-coal-800 sm:flex-row sm:items-center">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Order</span>
-                    <span className="font-mono text-lg font-black text-orange-500">
+                    <span className="font-mono text-lg font-black text-teal-600 dark:text-teal-400">
                       {formatOrderId(currentOrder)}
                     </span>
                     <span
@@ -331,7 +345,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                         if (res.order) setCurrentOrder(res.order);
                       });
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-600 transition hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:text-zinc-300"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-coal-200 px-3 py-2 text-xs font-bold text-zinc-600 transition hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:text-zinc-300"
                     title="Refresh order status"
                   >
                     <RefreshCw size={13} />
@@ -339,7 +353,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                   </button>
                   <button
                     onClick={() => setReceiptOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-xs font-black text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-400"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-xs font-black text-white shadow-md shadow-teal-500/20 transition hover:bg-teal-700"
                   >
                     <Receipt size={14} />
                     <span>Digital Receipt</span>
@@ -361,9 +375,9 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                   {/* Stepper Progress Bar */}
                   <div className="relative">
                     {/* Track line */}
-                    <div className="absolute left-0 top-6 hidden h-1 w-full bg-zinc-200 dark:bg-zinc-800 sm:block">
+                    <div className="absolute left-0 top-6 hidden h-1 w-full bg-coal-200 dark:bg-coal-800 sm:block">
                       <div
-                        className="h-1 bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-700"
+                        className="h-1 bg-gradient-to-r from-teal-500 to-teal-600 transition-all duration-700"
                         style={{
                           width: `${(Math.max(0, activeStep) / (STEPS.length - 1)) * 100}%`,
                         }}
@@ -383,10 +397,10 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                             <div
                               className={`relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-2 transition duration-500 ${
                                 isDone
-                                  ? "border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/30"
+                                  ? "border-teal-500 bg-teal-600 text-white shadow-lg shadow-teal-500/30"
                                   : isCurrent
-                                  ? "border-orange-500 bg-white text-orange-500 shadow-xl shadow-orange-500/30 ring-4 ring-orange-500/20 dark:bg-zinc-900"
-                                  : "border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-800"
+                                  ? "border-teal-500 bg-white text-teal-600 dark:text-teal-400 shadow-xl shadow-teal-500/30 ring-4 ring-teal-500/20 dark:bg-coal-900"
+                                  : "border-coal-200 bg-coal-100 text-zinc-400 dark:border-coal-800 dark:bg-coal-800"
                               }`}
                             >
                               <Icon size={20} className={isCurrent ? "animate-bounce" : ""} />
@@ -397,7 +411,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                               <p
                                 className={`text-xs font-black sm:mt-2 ${
                                   isCurrent
-                                    ? "text-orange-500 dark:text-orange-400"
+                                    ? "text-teal-600 dark:text-teal-400"
                                     : isDone
                                     ? "text-zinc-900 dark:text-white"
                                     : "text-zinc-400 dark:text-zinc-500"
@@ -416,8 +430,8 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                   </div>
 
                   {/* Active Step Highlight Box */}
-                  <div className="mt-8 flex items-center gap-3 rounded-2xl bg-orange-500/10 p-4 text-xs font-medium text-orange-700 dark:text-orange-300">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white font-bold">
+                  <div className="mt-8 flex items-center gap-3 rounded-2xl bg-teal-500/10 p-4 text-xs font-medium text-teal-700 dark:text-teal-300">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white font-bold">
                       {activeStep + 1}
                     </span>
                     <div>
@@ -434,13 +448,13 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
             {/* Order Details & Summary Grid */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
               {/* Items List */}
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 md:col-span-7 sm:p-7">
+              <div className="rounded-3xl border border-coal-200 bg-white p-6 shadow-sm dark:border-coal-800 dark:bg-coal-900 md:col-span-7 sm:p-7">
                 <h3 className="flex items-center gap-2 text-base font-black text-zinc-900 dark:text-white">
-                  <ShoppingBag size={18} className="text-orange-500" />
+                  <ShoppingBag size={18} className="text-teal-600 dark:text-teal-400" />
                   <span>Ordered Items ({items.reduce((s, i) => s + i.quantity, 0)})</span>
                 </h3>
 
-                <div className="mt-4 divide-y divide-zinc-100 dark:divide-zinc-800">
+                <div className="mt-4 divide-y divide-coal-100 dark:divide-coal-800">
                   {items.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between py-3.5">
                       <div className="flex items-center gap-3">
@@ -451,7 +465,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                             className="h-12 w-12 rounded-xl object-cover"
                           />
                         ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 font-bold text-orange-500">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-500/10 font-bold text-teal-600 dark:text-teal-400">
                             F
                           </div>
                         )}
@@ -462,9 +476,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                           </p>
                         </div>
                       </div>
-                      <span className="text-sm font-black text-zinc-900 dark:text-white">
-                        {formatCurrency(item.price * item.quantity)}
-                      </span>
+                      <div className="text-right"><span className="text-sm font-black text-zinc-900 dark:text-white">{formatCurrency(item.price * item.quantity)}</span></div>
                     </div>
                   ))}
                   {items.length === 0 && (
@@ -472,7 +484,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                   )}
                 </div>
 
-                <div className="mt-4 border-t border-dashed border-zinc-200 pt-4 text-xs dark:border-zinc-800">
+                <div className="mt-4 border-t border-dashed border-coal-200 pt-4 text-xs dark:border-coal-800">
                   <div className="flex justify-between py-1 text-zinc-500">
                     <span>Subtotal</span>
                     <span className="font-bold text-zinc-900 dark:text-white">
@@ -491,9 +503,9 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                       {formatCurrency(currentOrder.tax ?? 0)}
                     </span>
                   </div>
-                  <div className="mt-2 flex justify-between border-t border-zinc-100 pt-2 text-sm font-black dark:border-zinc-800">
+                  <div className="mt-2 flex justify-between border-t border-coal-100 pt-2 text-sm font-black dark:border-coal-800">
                     <span className="text-zinc-900 dark:text-white">Total Amount</span>
-                    <span className="text-base text-orange-500">
+                    <span className="text-base text-teal-600 dark:text-teal-400">
                       {formatCurrency(currentOrder.total_amount || currentOrder.total || 0)}
                     </span>
                   </div>
@@ -503,7 +515,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
               {/* Delivery & QR Code Panel */}
               <div className="flex flex-col gap-6 md:col-span-5">
                 {/* Customer & Address */}
-                <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="rounded-3xl border border-coal-200 bg-white p-6 shadow-sm dark:border-coal-800 dark:bg-coal-900">
                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
                     Delivery Details
                   </h3>
@@ -513,18 +525,18 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                     </p>
                     {currentOrder.mobile && (
                       <p className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
-                        <Phone size={13} className="text-orange-500" />
+                        <Phone size={13} className="text-teal-600 dark:text-teal-400" />
                         <span>{currentOrder.mobile}</span>
                       </p>
                     )}
                     {currentOrder.address && (
                       <p className="flex items-start gap-1.5 text-zinc-600 dark:text-zinc-400">
-                        <MapPin size={13} className="mt-0.5 shrink-0 text-orange-500" />
+                        <MapPin size={13} className="mt-0.5 shrink-0 text-teal-600 dark:text-teal-400" />
                         <span>{currentOrder.address}</span>
                       </p>
                     )}
                     {currentOrder.special_instructions && (
-                      <p className="mt-2 rounded-xl bg-orange-500/10 p-2.5 text-[11px] font-medium text-orange-700 dark:text-orange-300">
+                      <p className="mt-2 rounded-xl bg-teal-500/10 p-2.5 text-[11px] font-medium text-teal-700 dark:text-teal-300">
                         <span className="font-bold">Instructions:</span> {currentOrder.special_instructions}
                       </p>
                     )}
@@ -532,8 +544,8 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
                 </div>
 
                 {/* QR Code Quick Card */}
-                <div className="flex flex-col items-center rounded-3xl border border-zinc-200 bg-white p-6 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-sm dark:border-zinc-700">
+                <div className="flex flex-col items-center rounded-3xl border border-coal-200 bg-white p-6 text-center shadow-sm dark:border-coal-800 dark:bg-coal-900">
+                  <div className="rounded-2xl border border-coal-200 bg-white p-2.5 shadow-sm dark:border-coal-700">
                     <QRCodeSVG
                       value={trackingUrl}
                       size={100}
@@ -555,7 +567,7 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
             <div className="pt-4 text-center">
               <button
                 onClick={goToMenu}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-6 py-3 text-sm font-bold text-zinc-700 transition hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:text-zinc-300"
+                className="inline-flex items-center gap-2 rounded-full border border-coal-300 px-6 py-3 text-sm font-bold text-zinc-700 transition hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:text-zinc-300"
               >
                 <span>Order More Food</span>
                 <ChevronRight size={16} />
@@ -566,15 +578,15 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
 
         {/* Empty state when no search performed */}
         {!currentOrder && !searched && (
-          <div className="mt-14 rounded-3xl border border-dashed border-zinc-200 p-12 text-center dark:border-zinc-800">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500">
+          <div className="mt-14 rounded-3xl border border-dashed border-coal-200 p-12 text-center dark:border-coal-800">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
               <Clock size={28} />
             </div>
             <h3 className="mt-4 text-lg font-black text-zinc-900 dark:text-white">
               Ready to check your order status?
             </h3>
             <p className="mx-auto mt-2 max-w-sm text-xs text-zinc-500">
-              Enter your Order ID (e.g. <span className="font-mono font-bold text-orange-500">FW-86712</span>) from your confirmation to get live updates.
+              Enter your Order ID (e.g. <span className="font-mono font-bold text-teal-600 dark:text-teal-400">FW-86712</span>) from your confirmation to get live updates.
             </p>
           </div>
         )}

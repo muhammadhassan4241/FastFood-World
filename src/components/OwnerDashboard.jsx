@@ -72,15 +72,15 @@ function money(value) {
   return formatCurrency(value);
 }
 
-function StatCard({ label, value, change, icon: Icon, tone = "orange" }) {
+function StatCard({ label, value, change, icon: Icon, tone = "brand" }) {
   const tones = {
-    orange: "bg-orange-500/10 text-orange-500",
+    brand: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
     blue: "bg-blue-500/10 text-blue-500",
     green: "bg-emerald-500/10 text-emerald-500",
     purple: "bg-violet-500/10 text-violet-500",
   };
   return (
-    <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 sm:p-5 shadow-sm">
+    <div className="rounded-3xl border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900 p-4 sm:p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl ${tones[tone]}`}>
           <Icon size={20} />
@@ -105,19 +105,19 @@ function ProductModal({ product, onClose, onSave, saving }) {
   if (!product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/70 p-3 sm:p-4 backdrop-blur-sm overflow-y-auto">
-      <div className="relative my-auto w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-coal-950/70 p-3 sm:p-4 backdrop-blur-sm overflow-y-auto">
+      <div className="relative my-auto w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl border border-coal-200 bg-white shadow-2xl dark:border-coal-800 dark:bg-coal-900 overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 px-5 py-4 sm:px-6">
+        <div className="flex items-center justify-between border-b border-coal-100 dark:border-coal-800 px-5 py-4 sm:px-6">
           <div>
-            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-orange-500">Catalog</p>
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400">Catalog</p>
             <h2 className="mt-0.5 text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">
               {product.id ? "Edit product / drink" : "Add new product / drink"}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
+            className="rounded-full p-2 text-zinc-400 hover:bg-coal-100 hover:text-zinc-900 dark:hover:bg-coal-800 dark:hover:text-white"
             aria-label="Close modal"
           >
             <X size={18} />
@@ -139,7 +139,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
                   update("title", e.target.value);
                 }}
                 placeholder="e.g. Coca Cola or Crispy Zinger"
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
@@ -149,7 +149,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
               <select
                 value={form.category || "Burger"}
                 onChange={(e) => update("category", e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-semibold text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-semibold text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               >
                 {PRODUCT_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -170,7 +170,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
                 value={form.price ?? ""}
                 onChange={(e) => update("price", Number(e.target.value))}
                 placeholder="e.g. 150"
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
@@ -183,7 +183,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
                 value={form.stock_quantity ?? 25}
                 onChange={(e) => update("stock_quantity", Number(e.target.value))}
                 placeholder="25"
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
@@ -196,7 +196,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
                 value={form.low_stock_threshold ?? 5}
                 onChange={(e) => update("low_stock_threshold", Number(e.target.value))}
                 placeholder="5"
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
@@ -208,7 +208,7 @@ function ProductModal({ product, onClose, onSave, saving }) {
                 value={form.image ?? ""}
                 onChange={(e) => update("image", e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
@@ -220,18 +220,18 @@ function ProductModal({ product, onClose, onSave, saving }) {
                 onChange={(e) => update("description", e.target.value)}
                 rows={2}
                 placeholder="Crisp, chilled 350ml beverage or meal details..."
-                className="mt-1.5 w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-orange-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                className="mt-1.5 w-full resize-none rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
               />
             </label>
 
             {/* Availability Checkbox */}
-            <div className="sm:col-span-2 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-950/60">
+            <div className="sm:col-span-2 rounded-2xl border border-coal-200 bg-coal-50/70 p-3.5 dark:border-coal-800 dark:bg-coal-950/60">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={Boolean(form.is_available !== false)}
                   onChange={(e) => update("is_available", e.target.checked)}
-                  className="h-5 w-5 rounded-md accent-orange-500 cursor-pointer"
+                  className="h-5 w-5 rounded-md accent-teal-600 cursor-pointer"
                 />
                 <div>
                   <p className="text-sm font-bold text-zinc-900 dark:text-white">
@@ -247,17 +247,17 @@ function ProductModal({ product, onClose, onSave, saving }) {
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800 px-5 py-4 sm:px-6 bg-zinc-50/60 dark:bg-zinc-950/40">
+        <div className="flex items-center justify-end gap-3 border-t border-coal-100 dark:border-coal-800 px-5 py-4 sm:px-6 bg-coal-50/60 dark:bg-coal-950/40">
           <button
             onClick={onClose}
-            className="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-zinc-500 hover:bg-zinc-200/60 dark:hover:bg-zinc-800"
+            className="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-zinc-500 hover:bg-coal-200/60 dark:hover:bg-coal-800"
           >
             Cancel
           </button>
           <button
             disabled={saving}
             onClick={() => onSave(form)}
-            className="rounded-xl bg-orange-500 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-400 disabled:opacity-50"
+            className="rounded-xl bg-teal-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-teal-500/20 transition hover:bg-teal-700 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Product / Drink"}
           </button>
@@ -277,6 +277,7 @@ function OwnerDashboard({
   onProductsChanged,
   onOrdersChanged,
   onBackToStore,
+  ratingSummaries = {},
 }) {
   const [section, setSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -352,7 +353,10 @@ function OwnerDashboard({
   }, [onOrdersChanged]);
 
   const stats = useMemo(() => {
-    const revenue = normalizedOrdersList.reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
+    // Only count completed/delivered orders for revenue — matches SalesAnalytics
+    const revenue = normalizedOrdersList
+      .filter((o) => ["completed", "delivered"].includes((o.status || "").toLowerCase()))
+      .reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
     const pending = normalizedOrdersList.filter(
       (order) => (order.status || "pending").toLowerCase() === "pending"
     ).length;
@@ -373,7 +377,14 @@ function OwnerDashboard({
   }, [products, query]);
 
   const customers = useMemo(() => {
-    return [...new Map(normalizedOrdersList.map((order) => [order.mobile || order.customer_name, order])).values()];
+    // Reverse so the LATEST order for each customer is the one that overwrites in the Map
+    return [
+      ...new Map(
+        [...normalizedOrdersList]
+          .reverse()
+          .map((order) => [order.mobile || order.customer_name, order])
+      ).values(),
+    ].reverse(); // restore recency order for display
   }, [normalizedOrdersList]);
 
   const saveProduct = async (form) => {
@@ -429,18 +440,18 @@ function OwnerDashboard({
   const title = navItems.find((item) => item.id === section)?.label || "Overview";
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 overflow-x-hidden">
+    <div className="min-h-screen bg-[#f8f9fa] text-zinc-900 dark:bg-coal-950 dark:text-zinc-100 overflow-x-hidden">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm transition-opacity lg:hidden"
+          className="fixed inset-0 z-40 bg-coal-950/60 backdrop-blur-sm transition-opacity lg:hidden"
         />
       )}
 
       {/* Sidebar Navigation Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-full w-72 flex-col justify-between border-r border-zinc-200 bg-white p-5 transition-transform duration-300 dark:border-zinc-800 dark:bg-zinc-900 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-full w-72 flex-col justify-between border-r border-coal-200 bg-white p-5 transition-transform duration-300 dark:border-coal-800 dark:bg-coal-900 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >
@@ -448,12 +459,12 @@ function OwnerDashboard({
           {/* Brand & Mobile Close Button */}
           <div className="flex items-center justify-between px-1 py-2">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-500 text-lg font-black text-white shadow-lg shadow-orange-500/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-coal-900 text-white text-lg font-black shadow-lg shadow-teal-500/20">
                 F
               </div>
               <div>
                 <p className="font-black tracking-tight">
-                  FOOD <span className="text-orange-500">WORLD</span>
+                  FOOD <span className="text-teal-600 dark:text-teal-400">WORLD</span>
                 </p>
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-400">
                   Owner POS & KDS
@@ -463,7 +474,7 @@ function OwnerDashboard({
 
             <button
               onClick={() => setSidebarOpen(false)}
-              className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white lg:hidden"
+              className="rounded-xl p-1.5 text-zinc-400 hover:bg-coal-100 hover:text-zinc-900 dark:hover:bg-coal-800 dark:hover:text-white lg:hidden"
               aria-label="Close menu"
             >
               <X size={18} />
@@ -471,8 +482,8 @@ function OwnerDashboard({
           </div>
 
           {/* Workspace Info Card */}
-          <div className="my-5 rounded-2xl bg-orange-500/10 p-3.5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Workspace</p>
+          <div className="my-5 rounded-2xl bg-teal-500/10 p-3.5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400">Workspace</p>
             <p className="mt-0.5 text-sm font-semibold text-zinc-800 dark:text-zinc-200">Main Kitchen & POS</p>
             <p className="mt-0.5 truncate text-xs text-zinc-500">{user?.email}</p>
           </div>
@@ -488,8 +499,8 @@ function OwnerDashboard({
                 }}
                 className={`flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition ${
                   section === id
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20 font-bold"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
+                    ? "bg-teal-600 text-white shadow-lg shadow-teal-500/20 font-bold"
+                    : "text-zinc-500 hover:bg-coal-100 hover:text-zinc-900 dark:hover:bg-coal-800 dark:hover:text-white"
                 }`}
               >
                 <Icon size={18} />
@@ -497,7 +508,7 @@ function OwnerDashboard({
                 {id === "kitchen" && stats.pending > 0 && (
                   <span
                     className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-black ${
-                      section === id ? "bg-white/20 text-white" : "bg-orange-500 text-white"
+                      section === id ? "bg-white/20 text-white" : "bg-teal-600 text-white"
                     }`}
                   >
                     {stats.pending}
@@ -509,11 +520,11 @@ function OwnerDashboard({
         </div>
 
         {/* Sidebar Bottom Controls */}
-        <div className="space-y-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <div className="space-y-2 border-t border-coal-100 pt-4 dark:border-coal-800">
           {onBackToStore && (
             <button
               onClick={onBackToStore}
-              className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition"
+              className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-zinc-600 hover:bg-coal-100 dark:text-zinc-300 dark:hover:bg-coal-800 transition"
             >
               <Store size={17} />
               <span>Back to Storefront</span>
@@ -534,11 +545,11 @@ function OwnerDashboard({
       <main className="min-h-screen lg:pl-72 flex flex-col justify-between">
         <div>
           {/* Top Navbar */}
-          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-zinc-200 bg-white/85 px-3 py-3 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/85 sm:px-6">
+          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-coal-200 bg-white/85 px-3 py-3 backdrop-blur-xl dark:border-coal-800 dark:bg-coal-950/85 sm:px-6">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-xl p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 lg:hidden"
+                className="rounded-xl p-2 text-zinc-600 hover:bg-coal-100 dark:text-zinc-300 dark:hover:bg-coal-800 lg:hidden"
                 aria-label="Toggle navigation"
               >
                 <Menu size={20} />
@@ -553,7 +564,7 @@ function OwnerDashboard({
               {onBackToStore && (
                 <button
                   onClick={onBackToStore}
-                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-800 dark:text-zinc-300"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-coal-200 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-800 dark:text-zinc-300"
                 >
                   <Store size={14} />
                   <span>Storefront</span>
@@ -573,7 +584,7 @@ function OwnerDashboard({
                   onProductsChanged();
                   onOrdersChanged();
                 }}
-                className="rounded-xl border border-zinc-200 p-2 sm:p-2.5 text-zinc-500 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-800"
+                className="rounded-xl border border-coal-200 p-2 sm:p-2.5 text-zinc-500 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-800"
                 title="Refresh Live Data"
               >
                 <RefreshCw size={16} />
@@ -584,7 +595,7 @@ function OwnerDashboard({
                 <p className="text-[10px] text-zinc-500">{new Date().toLocaleDateString()}</p>
               </div>
 
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-orange-100 text-xs sm:text-sm font-black text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-teal-100 text-xs sm:text-sm font-black text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
                 {(user?.email?.[0] || "O").toUpperCase()}
               </div>
             </div>
@@ -593,7 +604,7 @@ function OwnerDashboard({
           {/* Body Content Container */}
           <div className="mx-auto max-w-[1500px] p-3 sm:p-6 lg:p-8">
             {notice && (
-              <div className="mb-5 flex items-center justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs sm:text-sm text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300 animate-fade-in">
+              <div className="mb-5 flex items-center justify-between rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-xs sm:text-sm text-teal-700 dark:border-teal-500/20 dark:bg-teal-500/10 dark:text-teal-300 animate-fade-in">
                 <span>{notice}</span>
                 <button onClick={() => setNotice("")} className="p-1">
                   <X size={16} />
@@ -606,6 +617,7 @@ function OwnerDashboard({
                 stats={stats}
                 orders={normalizedOrdersList}
                 products={products}
+                ratingSummaries={ratingSummaries}
                 setSection={setSection}
                 onViewReceipt={setActiveReceiptOrder}
               />
@@ -654,7 +666,7 @@ function OwnerDashboard({
         </div>
 
         {/* Dashboard Footer */}
-        <footer className="border-t border-zinc-200 dark:border-zinc-800/80 px-4 py-4 text-center text-[11px] text-zinc-400">
+        <footer className="border-t border-coal-200 dark:border-coal-800/80 px-4 py-4 text-center text-[11px] text-zinc-400">
           Food World Operations Terminal · Fully Responsive POS
         </footer>
       </main>
@@ -687,9 +699,33 @@ function OwnerDashboard({
   );
 }
 
-function Overview({ stats, orders, products, setSection, onViewReceipt }) {
+function Overview({ stats, orders, products, ratingSummaries = {}, setSection, onViewReceipt }) {
   const recent = orders.slice(0, 6);
   const max = Math.max(...orders.map((order) => Number(order.total_amount || 0)), 1);
+
+  // Compute real rating stats from Supabase data
+  const ratingStats = useMemo(() => {
+    const entries = Object.entries(ratingSummaries);
+    if (!entries.length) return { avgAll: 0, totalCount: 0, bestProduct: null };
+
+    const totalCount = entries.reduce((sum, [, s]) => sum + (s.count || 0), 0);
+    const weightedSum = entries.reduce((sum, [, s]) => sum + (s.avgRating || 0) * (s.count || 0), 0);
+    const avgAll = totalCount > 0 ? weightedSum / totalCount : 0;
+
+    let bestProductId = null;
+    let bestAvg = 0;
+    for (const [pid, s] of entries) {
+      if ((s.avgRating || 0) > bestAvg) {
+        bestAvg = s.avgRating;
+        bestProductId = Number(pid);
+      }
+    }
+    const bestProduct = bestProductId
+      ? products.find((p) => p.id === bestProductId)
+      : null;
+
+    return { avgAll, totalCount, bestProduct, bestAvg };
+  }, [ratingSummaries, products]);
 
   return (
     <div className="space-y-6">
@@ -704,7 +740,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
           </div>
           <button
             onClick={() => setSection("kitchen")}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-orange-500/20 hover:bg-orange-400"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-teal-500/20 hover:bg-teal-700"
           >
             <ChefHat size={15} />
             <span>Open Kitchen Display (KDS)</span>
@@ -713,7 +749,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
 
         {/* Responsive KPI Grid */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Total revenue" value={money(stats.revenue)} change="Live" icon={TrendingUp} />
+          <StatCard label="Completed Revenue" value={money(stats.revenue)} change="Delivered orders" icon={TrendingUp} />
           <StatCard label="Total orders" value={orders.length} change="All-time" icon={ClipboardList} tone="blue" />
           <StatCard label="Items in stock" value={stats.stock} change="Healthy" icon={Boxes} tone="green" />
           <StatCard
@@ -724,11 +760,39 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
             tone="purple"
           />
         </div>
+
+        {/* Real Rating Stats Row */}
+        {ratingStats.totalCount > 0 && (
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-3xl border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900 p-4 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Avg Product Rating</p>
+              <p className="mt-1.5 flex items-center gap-1.5 text-2xl font-black text-zinc-900 dark:text-white">
+                <span className="text-amber-400">⭐</span>
+                {ratingStats.avgAll.toFixed(1)}
+              </p>
+              <p className="mt-0.5 text-[11px] text-zinc-500">across all products</p>
+            </div>
+            <div className="rounded-3xl border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900 p-4 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Total Ratings</p>
+              <p className="mt-1.5 text-2xl font-black text-zinc-900 dark:text-white">{ratingStats.totalCount}</p>
+              <p className="mt-0.5 text-[11px] text-zinc-500">from verified customers</p>
+            </div>
+            {ratingStats.bestProduct && (
+              <div className="rounded-3xl border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900 p-4 shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Best Rated Product</p>
+                <p className="mt-1.5 truncate text-base font-black text-zinc-900 dark:text-white">
+                  {ratingStats.bestProduct.name || ratingStats.bestProduct.title}
+                </p>
+                <p className="mt-0.5 text-[11px] text-teal-600 dark:text-teal-400 font-bold">⭐ {ratingStats.bestAvg.toFixed(1)} avg</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Middle Grid: Revenue & Alerts */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+        <div className="rounded-3xl border border-coal-200 bg-white p-5 sm:p-6 dark:border-coal-800 dark:bg-coal-900 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-black text-zinc-900 dark:text-white">Revenue Snapshot</h2>
@@ -736,7 +800,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
             </div>
             <button
               onClick={() => setSection("reports")}
-              className="text-xs font-bold text-orange-500 hover:underline"
+              className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline"
             >
               Full Analytics →
             </button>
@@ -747,7 +811,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
               recent.map((order) => (
                 <div key={order.id} className="flex min-w-[40px] flex-1 flex-col items-center gap-1.5">
                   <div
-                    className="w-full rounded-t-xl bg-orange-500/80 transition hover:bg-orange-500"
+                    className="w-full rounded-t-xl bg-teal-500/80 transition hover:bg-teal-600"
                     style={{ height: `${Math.max((Number(order.total_amount || 0) / max) * 100, 8)}%` }}
                     title={`Rs. ${order.total_amount}`}
                   />
@@ -763,13 +827,13 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="rounded-3xl border border-zinc-200 bg-white p-5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+        <div className="rounded-3xl border border-coal-200 bg-white p-5 sm:p-6 dark:border-coal-800 dark:bg-coal-900 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-black text-zinc-900 dark:text-white">Inventory Alerts</h2>
               <p className="mt-0.5 text-xs text-zinc-500">Products & drinks needing attention</p>
             </div>
-            <AlertTriangle className="text-orange-500" size={20} />
+            <AlertTriangle className="text-amber-500" size={20} />
           </div>
           <div className="mt-5 space-y-3">
             {products
@@ -778,7 +842,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
               .map((product) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between rounded-2xl bg-orange-50 px-3.5 py-3 dark:bg-orange-500/10"
+                  className="flex items-center justify-between rounded-2xl bg-amber-50 px-3.5 py-3 dark:bg-amber-500/10"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <img
@@ -788,10 +852,10 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
                     />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{product.name || product.title}</p>
-                      <span className="text-[10px] font-bold text-orange-500">{product.category}</span>
+                      <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">{product.category}</span>
                     </div>
                   </div>
-                  <span className="ml-2 whitespace-nowrap text-xs font-bold text-orange-600 dark:text-orange-400">
+                  <span className="ml-2 whitespace-nowrap text-xs font-bold text-amber-700 dark:text-amber-400">
                     {product.stock_quantity ?? 0} left
                   </span>
                 </div>
@@ -802,7 +866,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
       </div>
 
       {/* Recent Orders Card */}
-      <div className="rounded-3xl border border-zinc-200 bg-white p-4 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+      <div className="rounded-3xl border border-coal-200 bg-white p-4 sm:p-6 dark:border-coal-800 dark:bg-coal-900 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="font-black text-zinc-900 dark:text-white">Recent Customer Orders</h2>
@@ -810,7 +874,7 @@ function Overview({ stats, orders, products, setSection, onViewReceipt }) {
           </div>
           <button
             onClick={() => setSection("orders")}
-            className="text-xs font-bold text-orange-500 hover:underline"
+            className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline"
           >
             View all →
           </button>
@@ -845,7 +909,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
         </div>
         <button
           onClick={onAdd}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-orange-500/20 hover:bg-orange-400 transition"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-teal-500/20 hover:bg-teal-700 transition"
         >
           <Plus size={17} />
           <span>Add Product / Drink</span>
@@ -861,8 +925,8 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
               onClick={() => setActiveCategory(cat)}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-bold whitespace-nowrap transition ${
                 activeCategory === cat
-                  ? "bg-orange-500 text-white shadow-sm"
-                  : "border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+                  ? "bg-teal-600 text-white shadow-sm"
+                  : "border border-coal-200 bg-white text-zinc-600 dark:border-coal-800 dark:bg-coal-900 dark:text-zinc-400"
               }`}
             >
               {cat}
@@ -876,7 +940,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search items..."
-            className="w-full rounded-2xl border border-zinc-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900"
+            className="w-full rounded-2xl border border-coal-200 bg-white py-2 pl-9 pr-3 text-xs outline-none focus:border-teal-500 dark:border-coal-800 dark:bg-coal-900"
           />
         </div>
       </div>
@@ -889,7 +953,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
           return (
             <div
               key={product.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+              className="rounded-2xl border border-coal-200 bg-white p-4 dark:border-coal-800 dark:bg-coal-900 shadow-sm"
             >
               <div className="flex items-start gap-3">
                 <img
@@ -900,17 +964,17 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-1">
                     <p className="font-bold text-sm text-zinc-900 dark:text-white truncate">{title}</p>
-                    <span className="text-xs font-black text-orange-500 shrink-0">{money(product.price)}</span>
+                    <span className="text-xs font-black text-teal-600 dark:text-teal-400 shrink-0">{money(product.price)}</span>
                   </div>
                   <p className="line-clamp-1 text-xs text-zinc-500 mt-0.5">{product.description}</p>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold text-orange-500">
+                    <span className="rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-600 dark:text-teal-400">
                       {product.category}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                         product.is_available === false
-                          ? "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"
+                          ? "bg-coal-100 text-zinc-500 dark:bg-coal-800"
                           : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
                       }`}
                     >
@@ -918,7 +982,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                     </span>
                     <span
                       className={`text-[10px] font-bold ml-auto ${
-                        isLow ? "text-orange-500" : "text-zinc-500"
+                        isLow ? "text-amber-600 dark:text-amber-400" : "text-zinc-500"
                       }`}
                     >
                       Stock: {product.stock_quantity ?? "—"}
@@ -928,10 +992,10 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-3 flex items-center justify-end gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <div className="mt-3 flex items-center justify-end gap-2 border-t border-coal-100 pt-3 dark:border-coal-800">
                 <button
                   onClick={() => onEdit(product)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:text-zinc-300"
+                  className="inline-flex items-center gap-1 rounded-xl border border-coal-200 px-3 py-1.5 text-xs font-bold text-zinc-700 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:text-zinc-300"
                 >
                   <Pencil size={13} />
                   <span>Edit</span>
@@ -950,10 +1014,10 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
       </div>
 
       {/* Desktop/Tablet Table (Visible on screens >= 640px) */}
-      <div className="hidden sm:block overflow-hidden rounded-3xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+      <div className="hidden sm:block overflow-hidden rounded-3xl border border-coal-200 bg-white dark:border-coal-800 dark:bg-coal-900 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950">
+            <thead className="border-b border-coal-200 bg-coal-50 text-xs uppercase tracking-wider text-zinc-500 dark:border-coal-800 dark:bg-coal-950">
               <tr>
                 <th className="px-5 py-4">Item</th>
                 <th className="px-5 py-4">Category</th>
@@ -963,11 +1027,11 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                 <th className="px-5 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <tbody className="divide-y divide-coal-100 dark:divide-coal-800">
               {displayedProducts.map((product) => {
                 const title = product.name || product.title;
                 return (
-                  <tr key={product.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-950">
+                  <tr key={product.id} className="hover:bg-coal-50 dark:hover:bg-coal-950">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <img
@@ -987,7 +1051,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                       <span
                         className={
                           Number(product.stock_quantity ?? 0) <= Number(product.low_stock_threshold ?? 5)
-                            ? "font-bold text-orange-500"
+                            ? "font-bold text-amber-600 dark:text-amber-400"
                             : "text-zinc-600 dark:text-zinc-300"
                         }
                       >
@@ -998,7 +1062,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs font-bold ${
                           product.is_available === false
-                            ? "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"
+                            ? "bg-coal-100 text-zinc-500 dark:bg-coal-800"
                             : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
                         }`}
                       >
@@ -1009,7 +1073,7 @@ function ProductsSection({ products, query, setQuery, onAdd, onEdit, onDelete })
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => onEdit(product)}
-                          className="rounded-xl p-2 text-zinc-500 hover:bg-orange-50 hover:text-orange-500 dark:hover:bg-orange-500/10"
+                          className="rounded-xl p-2 text-zinc-500 hover:bg-teal-50 hover:text-teal-600 dark:hover:text-teal-400 dark:hover:bg-teal-500/10"
                           title="Edit"
                         >
                           <Pencil size={16} />
@@ -1055,7 +1119,7 @@ function InventorySection({ products, onEdit }) {
           return (
             <div
               key={product.id}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+              className="rounded-3xl border border-coal-200 bg-white p-5 dark:border-coal-800 dark:bg-coal-900 shadow-sm"
             >
               <div className="flex items-center gap-3">
                 <img
@@ -1072,14 +1136,14 @@ function InventorySection({ products, onEdit }) {
               <div className="mt-5 flex items-end justify-between">
                 <div>
                   <p className="text-xs text-zinc-500">Current stock</p>
-                  <p className={`text-2xl font-black ${low ? "text-orange-500" : "text-zinc-900 dark:text-white"}`}>
+                  <p className={`text-2xl font-black ${low ? "text-amber-600 dark:text-amber-400" : "text-zinc-900 dark:text-white"}`}>
                     {product.stock_quantity ?? "—"}
                   </p>
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-bold ${
                     low
-                      ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400"
+                      ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
                       : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
                   }`}
                 >
@@ -1089,7 +1153,7 @@ function InventorySection({ products, onEdit }) {
 
               <button
                 onClick={() => onEdit(product)}
-                className="mt-5 w-full rounded-2xl border border-zinc-200 py-2.5 text-xs sm:text-sm font-bold hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 transition"
+                className="mt-5 w-full rounded-2xl border border-coal-200 py-2.5 text-xs sm:text-sm font-bold hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 transition"
               >
                 Update Stock
               </button>
@@ -1114,11 +1178,11 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
           return (
             <div
               key={order.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/90 shadow-sm"
+              className="rounded-2xl border border-coal-200 bg-white p-4 dark:border-coal-800 dark:bg-coal-900/90 shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-mono text-sm font-black text-orange-600 dark:text-orange-400">
+                  <span className="font-mono text-sm font-black text-teal-600 dark:text-teal-400">
                     {formatOrderId(order)}
                   </span>
                   <p className="font-bold text-zinc-900 dark:text-white mt-0.5">{order.customer_name || "Guest"}</p>
@@ -1133,15 +1197,15 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
                 </span>
               </div>
 
-              <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-2.5 dark:border-zinc-800 text-xs">
+              <div className="mt-3 flex items-center justify-between border-t border-coal-100 pt-2.5 dark:border-coal-800 text-xs">
                 <span className="text-zinc-400">{formatDateTime(order.created_at)}</span>
                 <span className="font-black text-zinc-900 dark:text-white">{money(order.total_amount || 0)}</span>
               </div>
 
-              <div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-2.5 dark:border-zinc-800">
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-coal-100 pt-2.5 dark:border-coal-800">
                 <button
                   onClick={() => onViewReceipt(order)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs font-bold text-zinc-600 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:text-zinc-300"
+                  className="inline-flex items-center gap-1 rounded-xl border border-coal-200 px-3 py-1.5 text-xs font-bold text-zinc-600 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:text-zinc-300"
                 >
                   <Receipt size={13} />
                   <span>Receipt</span>
@@ -1151,7 +1215,7 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
                   <select
                     value={statusKey}
                     onChange={(event) => onStatus(order.id, event.target.value)}
-                    className="rounded-xl border border-zinc-200 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                    className="rounded-xl border border-coal-200 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-coal-700 dark:text-zinc-300"
                   >
                     <option value="pending">Pending</option>
                     <option value="preparing">Preparing</option>
@@ -1169,7 +1233,7 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
       {/* Desktop/Tablet Orders Table (>= 640px) */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full min-w-[650px] text-left text-sm">
-          <thead className="border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 dark:border-zinc-800">
+          <thead className="border-b border-coal-200 text-xs uppercase tracking-wider text-zinc-500 dark:border-coal-800">
             <tr>
               <th className="px-4 py-3">Order ID</th>
               <th className="px-4 py-3">Customer</th>
@@ -1179,15 +1243,15 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-coal-100 dark:divide-coal-800">
             {orders.map((order) => {
               const rawStatus = (order.status || "pending").toLowerCase();
               const statusKey = rawStatus === "delivered" ? "completed" : rawStatus;
               const statusInfo = ORDER_STATUS_MAP[statusKey] || ORDER_STATUS_MAP.pending;
 
               return (
-                <tr key={order.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/30">
-                  <td className="px-4 py-4 font-mono font-bold text-orange-600 dark:text-orange-400">
+                <tr key={order.id} className="hover:bg-coal-50/60 dark:hover:bg-coal-800/30">
+                  <td className="px-4 py-4 font-mono font-bold text-teal-600 dark:text-teal-400">
                     {formatOrderId(order)}
                   </td>
                   <td className="px-4 py-4">
@@ -1210,7 +1274,7 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onViewReceipt(order)}
-                        className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-2.5 py-1.5 text-xs font-bold text-zinc-600 hover:border-orange-500 hover:text-orange-500 dark:border-zinc-700 dark:text-zinc-300"
+                        className="inline-flex items-center gap-1 rounded-xl border border-coal-200 px-2.5 py-1.5 text-xs font-bold text-zinc-600 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 dark:border-coal-700 dark:text-zinc-300"
                         title="View & Print Digital Receipt"
                       >
                         <Receipt size={13} />
@@ -1221,7 +1285,7 @@ function OrdersTable({ orders, compact = false, onStatus, onViewReceipt }) {
                         <select
                           value={statusKey}
                           onChange={(event) => onStatus(order.id, event.target.value)}
-                          className="rounded-xl border border-zinc-200 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                          className="rounded-xl border border-coal-200 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-coal-700 dark:text-zinc-300"
                         >
                           <option value="pending">Pending</option>
                           <option value="preparing">Preparing</option>
@@ -1279,7 +1343,7 @@ function OrdersSection({ orders, onStatus, onViewReceipt }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search orders..."
-            className="w-full rounded-2xl border border-zinc-200 bg-white py-2 pl-9 pr-3 text-xs outline-none dark:border-zinc-800 dark:bg-zinc-900"
+            className="w-full rounded-2xl border border-coal-200 bg-white py-2 pl-9 pr-3 text-xs outline-none dark:border-coal-800 dark:bg-coal-900"
           />
         </div>
       </div>
@@ -1292,8 +1356,8 @@ function OrdersSection({ orders, onStatus, onViewReceipt }) {
             onClick={() => setFilter(st)}
             className={`rounded-xl px-3 py-1.5 text-xs font-bold capitalize whitespace-nowrap transition ${
               filter === st
-                ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
-                : "border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+                ? "bg-teal-600 text-white shadow-md shadow-teal-500/20"
+                : "border border-coal-200 bg-white text-zinc-600 dark:border-coal-800 dark:bg-coal-900 dark:text-zinc-400"
             }`}
           >
             {st === "all" ? "All Orders" : st} (
@@ -1308,7 +1372,7 @@ function OrdersSection({ orders, onStatus, onViewReceipt }) {
         ))}
       </div>
 
-      <div className="rounded-3xl border border-zinc-200 bg-white p-4 sm:p-5 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+      <div className="rounded-3xl border border-coal-200 bg-white p-4 sm:p-5 dark:border-coal-800 dark:bg-coal-900 shadow-sm">
         <OrdersTable orders={filtered} onStatus={onStatus} onViewReceipt={onViewReceipt} />
       </div>
     </div>
@@ -1334,10 +1398,10 @@ function CustomersSection({ customers, orders }) {
           return (
             <div
               key={customer.id}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+              className="rounded-3xl border border-coal-200 bg-white p-5 dark:border-coal-800 dark:bg-coal-900 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 font-black text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100 font-black text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 shrink-0">
                   {(customer.customer_name || "G")[0]}
                 </div>
                 <div className="min-w-0">
@@ -1347,14 +1411,14 @@ function CustomersSection({ customers, orders }) {
                   <p className="text-xs text-zinc-500 truncate">{customer.mobile || "No mobile"}</p>
                 </div>
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-2 border-t border-zinc-100 pt-4 text-xs dark:border-zinc-800">
+              <div className="mt-5 grid grid-cols-2 gap-2 border-t border-coal-100 pt-4 text-xs dark:border-coal-800">
                 <div>
                   <span className="text-zinc-400">Total Orders</span>
                   <p className="text-sm font-bold text-zinc-900 dark:text-white">{count}</p>
                 </div>
                 <div className="text-right">
                   <span className="text-zinc-400">Total Spent</span>
-                  <p className="text-sm font-bold text-orange-500">{money(totalSpent)}</p>
+                  <p className="text-sm font-bold text-teal-600 dark:text-teal-400">{money(totalSpent)}</p>
                 </div>
               </div>
             </div>

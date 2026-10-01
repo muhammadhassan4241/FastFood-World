@@ -132,6 +132,7 @@ export function normalizeOrder(order, productsCatalog = []) {
 
   return {
     id: order.id,
+    customer_id: order.customer_id || null,
     order_id: orderId,
     customer_name: order.customer_name || order.name || embeddedMeta.customer_name || "Guest Customer",
     mobile: order.mobile || order.customer_phone || order.phone || embeddedMeta.mobile || "N/A",
@@ -221,8 +222,8 @@ export const ORDER_STATUS_MAP = {
   },
   ready: {
     label: "Ready",
-    badgeClass: "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30",
-    dotClass: "bg-teal-500",
+    badgeClass: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30",
+    dotClass: "bg-cyan-500",
     stepIndex: 2,
     description: "Order is packed, hot & ready for pickup/delivery",
     icon: "PackageCheck",

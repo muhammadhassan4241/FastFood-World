@@ -8,8 +8,11 @@ import CheckoutPage from "./components/CheckoutPage";
 import OwnerLogin from "./components/OwnerLogin";
 import OwnerDashboard from "./components/OwnerDashboard";
 import OrderTrackingPage from "./components/OrderTrackingPage";
+import CustomerAuthModal from "./components/CustomerAuthModal";
 import { supabase } from "./supabaseClient";
 import { normalizeOrder } from "./utils/orderUtils";
+import { useRatings } from "./hooks/useRatings";
+import { countReviews, getAverageRating } from "./data/productRating.js";
 
 import { products as defaultProducts } from "./data/Product";
 
@@ -23,7 +26,6 @@ function App() {
       return JSON.parse(localStorage.getItem("foodworld-cart") || "{}");
     } catch {
       return {};
-      return {};
     }
   });
   const [cartOpen, setCartOpen] = useState(false);
@@ -32,11 +34,21 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
+  const { reviewsVersion, fetchReviews, submitReview } = useRatings();
   const [loading, setLoading] = useState(true);
   const [owner, setOwner] = useState(null);
+  const [customer, setCustomer] = useState(null);
+  const [customerAuthOpen, setCustomerAuthOpen] = useState(false);
   const [theme, setTheme] = useState(() =>
     typeof window !== "undefined" ? localStorage.getItem("theme") || "dark" : "dark"
   );
+  const ratingSummaries = productsList.reduce((summaries, product) => {
+    summaries[product.id] = {
+      avgRating: getAverageRating(product.id),
+      count: countReviews(product.id),
+    };
+    return summaries;
+  }, {});
 
   const fetchProducts = async () => {
     try {
@@ -84,9 +96,12 @@ function App() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchProducts(), fetchOrders()]);
+      await Promise.all([fetchProducts(), fetchOrders(), fetchReviews()]);
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user) setOwner(data.session.user);
+      if (data.session?.user) {
+        setCustomer(data.session.user);
+        setOwner(data.session.user);
+      }
 
       // Check if URL contains ?tracking=FW-XXXX or ?order_id=...
       if (typeof window !== "undefined") {
@@ -101,11 +116,12 @@ function App() {
       setLoading(false);
     };
     load();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) =>
-      setOwner(session?.user || null)
-    );
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCustomer(session?.user || null);
+      setOwner(session?.user || null);
+    });
     return () => listener.subscription?.unsubscribe();
-  }, []);
+  }, [fetchReviews]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -261,7 +277,35 @@ function App() {
     // 3. Refresh orders from database
     await fetchOrders();
 
-    // 4. Return normalized order with the real saved database ID & human readable order_id
+    // 4. Decrement stock for ordered items
+    try {
+      for (const item of details.items || []) {
+        const prodId = item.id || item.productId;
+        const product = productsList.find((p) => p.id === prodId);
+        if (product && product.stock_quantity != null) {
+          const newStock = Math.max(0, Number(product.stock_quantity) - Number(item.quantity || 1));
+          const update = { stock_quantity: newStock };
+          if (newStock === 0) update.is_available = false;
+          await supabase.from("products").update(update).eq("id", product.id);
+        }
+
+        // If item has a drink combo, also decrement the drink product's stock
+        if (item.drink && item.drink.id) {
+          const drinkProduct = productsList.find((p) => p.id === item.drink.id);
+          if (drinkProduct && drinkProduct.stock_quantity != null) {
+            const drinkNewStock = Math.max(0, Number(drinkProduct.stock_quantity) - Number(item.quantity || 1));
+            const drinkUpdate = { stock_quantity: drinkNewStock };
+            if (drinkNewStock === 0) drinkUpdate.is_available = false;
+            await supabase.from("products").update(drinkUpdate).eq("id", drinkProduct.id);
+          }
+        }
+      }
+      await fetchProducts();
+    } catch (stockErr) {
+      console.warn("Stock decrement warning:", stockErr);
+    }
+
+    // 5. Return normalized order with the real saved database ID & human readable order_id
     const normalized = normalizeOrder(savedData, productsList);
     // Ensure the generated order_id from client is preserved if DB column didn't store it
     if (!normalized.order_id || normalized.order_id === "FW-00000") {
@@ -292,10 +336,15 @@ function App() {
     setPage("home");
   };
 
+  const handleCustomerSignOut = async () => {
+    await supabase.auth.signOut();
+    setCustomer(null);
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-orange-500">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-coal-950 text-teal-400">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-teal-500 border-t-transparent" />
       </div>
     );
   }
@@ -329,7 +378,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="min-h-screen bg-coal-50 font-sans text-zinc-900 transition-colors duration-300 dark:bg-coal-950 dark:text-zinc-100">
       <Header
         page={page}
         setPage={setPage}
@@ -338,6 +387,9 @@ function App() {
         theme={theme}
         toggleTheme={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
         onOwner={() => setPage("owner")}
+        customer={customer}
+        onOpenCustomerAuth={() => setCustomerAuthOpen(true)}
+        onCustomerSignOut={handleCustomerSignOut}
       />
 
       {page === "home" && (
@@ -349,6 +401,7 @@ function App() {
           goToMenu={goToMenu}
           goToCategory={goToCategory}
           onOpenDetail={setDetailProduct}
+          ratingSummaries={ratingSummaries}
         />
       )}
 
@@ -360,6 +413,7 @@ function App() {
           onRemove={removeFromCart}
           initialCategory={jumpCategory}
           onOpenDetail={setDetailProduct}
+          ratingSummaries={ratingSummaries}
         />
       )}
 
@@ -372,6 +426,7 @@ function App() {
           goToMenu={goToMenu}
           onPlaceOrder={handlePlaceOrder}
           onGoToTracking={goToTracking}
+          customer={customer}
         />
       )}
 
@@ -383,7 +438,7 @@ function App() {
         />
       )}
 
-      <footer className="border-t border-zinc-200 px-6 py-8 text-center dark:border-orange-500/10">
+      <footer className="border-t border-coal-200 px-6 py-8 text-center dark:border-teal-500/10">
         <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">
           Food World · Fresh & Fast Restaurant POS
         </p>
@@ -409,7 +464,20 @@ function App() {
         onAdd={addToCart}
         onRemove={removeFromCart}
         onClose={() => setDetailProduct(null)}
+        onSubmitReview={submitReview}
+        ratingSummary={detailProduct ? ratingSummaries[detailProduct.id] || null : null}
+        reviewsVersion={reviewsVersion}
       />
+
+      {customerAuthOpen && (
+        <CustomerAuthModal
+          onClose={() => setCustomerAuthOpen(false)}
+          onAuthenticated={(user) => {
+            setCustomer(user);
+            setCustomerAuthOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
