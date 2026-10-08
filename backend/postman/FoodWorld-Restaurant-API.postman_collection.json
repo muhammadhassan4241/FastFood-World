@@ -1,0 +1,66 @@
+{
+  "info": { "name": "FoodWorld Restaurant API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "customerToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "superAdminToken", "value": "" },
+    { "key": "restaurantId", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "menuItemId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "userId", "value": "" }
+  ],
+  "item": [
+    { "name": "Authentication", "item": [
+      { "name": "Register", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"New Customer\",\n  \"email\": \"new@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"+923001234567\"\n}" }, "url": "{{baseUrl}}/auth/register" } },
+      { "name": "Login", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"email\":\"customer1@foodworld.test\",\"password\":\"Customer123!\"}" }, "url": "{{baseUrl}}/auth/login" } },
+      { "name": "Logout", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/auth/logout" } }
+    ] },
+    { "name": "Customer", "item": [
+      { "name": "My profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/users/me" } },
+      { "name": "Update profile", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Customer One Updated\"}" }, "url": "{{baseUrl}}/users/me" } },
+      { "name": "Change password", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"currentPassword\":\"Customer123!\",\"newPassword\":\"NewPassword123!\"}" }, "url": "{{baseUrl}}/users/change-password" } },
+      { "name": "Get cart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/cart" } },
+      { "name": "Add cart item", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"menuItemId\":\"{{menuItemId}}\",\"quantity\":2}" }, "url": "{{baseUrl}}/cart/items" } },
+      { "name": "Update cart item", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"quantity\":3}" }, "url": "{{baseUrl}}/cart/items/{{menuItemId}}" } },
+      { "name": "Remove cart item", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/cart/items/{{menuItemId}}" } },
+      { "name": "Clear cart", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/cart" } },
+      { "name": "Place order", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"deliveryAddress\":{\"address\":\"10 Main Street\",\"city\":\"Karachi\",\"postalCode\":\"75000\"},\"phone\":\"+923001234567\",\"paymentMethod\":\"cash\"}" }, "url": "{{baseUrl}}/orders" } },
+      { "name": "My orders", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/orders/my-orders" } },
+      { "name": "Get order", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/orders/{{orderId}}" } },
+      { "name": "Cancel order", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }], "url": "{{baseUrl}}/orders/{{orderId}}/cancel" } }
+    ] },
+    { "name": "Restaurants and menu", "item": [
+      { "name": "List restaurants", "request": { "method": "GET", "url": "{{baseUrl}}/restaurants?search=food&city=Karachi&page=1&limit=10" } },
+      { "name": "Restaurant details", "request": { "method": "GET", "url": "{{baseUrl}}/restaurants/{{restaurantId}}" } },
+      { "name": "List categories", "request": { "method": "GET", "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories" } },
+      { "name": "List menu", "request": { "method": "GET", "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu?category={{categoryId}}&search=burger&minPrice=100&maxPrice=2000" } },
+      { "name": "Get menu item", "request": { "method": "GET", "url": "{{baseUrl}}/menu/{{menuItemId}}" } }
+    ] },
+    { "name": "Restaurant admin", "item": [
+      { "name": "Create restaurant", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Food World New\",\"phone\":\"+923001234567\",\"email\":\"new@foodworld.test\",\"address\":\"10 Main Street\",\"city\":\"Karachi\"}" }, "url": "{{baseUrl}}/restaurants" } },
+      { "name": "Create category", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Burgers\",\"sortOrder\":1}" }, "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories" } },
+      { "name": "Create menu item", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"category\":\"{{categoryId}}\",\"name\":\"Zinger Burger\",\"price\":650,\"preparationTime\":15}" }, "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu" } },
+      { "name": "Update/deactivate category", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"description\":\"Premium burgers\"}" }, "url": "{{baseUrl}}/categories/{{categoryId}}" } },
+      { "name": "Update menu item", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"price\":699}" }, "url": "{{baseUrl}}/menu/{{menuItemId}}" } },
+      { "name": "Set availability", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"isAvailable\":false}" }, "url": "{{baseUrl}}/menu/{{menuItemId}}/availability" } },
+      { "name": "Restaurant orders", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/restaurants/{{restaurantId}}/orders?status=pending" } },
+      { "name": "Update order status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"status\":\"confirmed\"}" }, "url": "{{baseUrl}}/orders/{{orderId}}/status" } }
+    ] },
+    { "name": "Management cleanup and uploads", "item": [
+      { "name": "Update restaurant", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"isOpen\":true}" }, "url": "{{baseUrl}}/restaurants/{{restaurantId}}" } },
+      { "name": "Deactivate restaurant", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/restaurants/{{restaurantId}}" } },
+      { "name": "Deactivate category", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/categories/{{categoryId}}" } },
+      { "name": "Deactivate menu item", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/menu/{{menuItemId}}" } },
+      { "name": "Upload image", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "image", "type": "file", "src": "" }] }, "url": "{{baseUrl}}/uploads/image" } }
+    ] },
+    { "name": "Super admin", "item": [
+      { "name": "Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }], "url": "{{baseUrl}}/admin/users" } },
+      { "name": "Block or unblock user", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"isActive\":false}" }, "url": "{{baseUrl}}/admin/users/{{userId}}/status" } },
+      { "name": "Restaurants", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }], "url": "{{baseUrl}}/admin/restaurants" } },
+      { "name": "All orders", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }], "url": "{{baseUrl}}/admin/orders" } },
+      { "name": "Dashboard", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{superAdminToken}}" }], "url": "{{baseUrl}}/admin/dashboard" } }
+    ] }
+  ]
+}

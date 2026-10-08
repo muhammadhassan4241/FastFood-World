@@ -1,0 +1,2 @@
+const asyncHandler = require("../utils/asyncHandler"); const AppError = require("../utils/AppError"); const { success } = require("../utils/apiResponse"); const { uploadImage } = require("../services/image.service");
+exports.image = asyncHandler(async (req, res) => { if (!req.file) throw new AppError("An image file is required", 422); const url = await uploadImage(req.file.buffer); success(res, { status: 201, message: "Image uploaded successfully", data: { url } }); });

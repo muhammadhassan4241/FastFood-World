@@ -297,7 +297,7 @@ function CheckoutPage({
             <p className="font-bold">Order Placement Issue</p>
             <p className="mt-0.5">{errorMessage}</p>
             <p className="mt-1 opacity-80">
-              Note: If this is an RLS policy issue, please run the updated SQL migration in Supabase SQL Editor.
+              Note: Please ensure the FoodWorld backend API server is running on http://localhost:5000.
             </p>
           </div>
         </div>

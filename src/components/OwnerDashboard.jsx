@@ -22,10 +22,15 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { supabase } from "../supabaseClient";
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct as deleteProductFromMongo,
+} from "../services/productService";
+import { updateOrderStatus as updateOrderStatusApi } from "../services/orderService";
 import {
   formatCurrency,
-  formatDateTime,
+  formatDateTime, 
   formatOrderId,
   normalizeOrder,
   ORDER_STATUS_MAP,
@@ -295,62 +300,52 @@ function OwnerDashboard({
     return orders.map((o) => normalizeOrder(o, products));
   }, [orders, products]);
 
-  // Supabase Realtime Subscription for incoming orders & updates
+  // Live polling & order tracking for incoming orders
   useEffect(() => {
-    const ordersChannel = supabase
-      .channel("owner-dashboard-realtime-orders")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders" },
-        (payload) => {
-          const newOrder = payload.new;
-          if (!newOrder) return;
+    let lastOrderCount = orders.length;
 
-          if (typeof window !== "undefined" && localStorage.getItem("foodworld-sound") !== "disabled") {
-            playNotificationSound();
-          }
-
-          const toastData = {
-            id: Date.now(),
-            title: "New Order Placed!",
-            message: `Order ${formatOrderId(newOrder)} from ${newOrder.customer_name || "Guest"}`,
-            amount: newOrder.total_amount || newOrder.total,
-            order: newOrder,
-            time: new Date(),
-            read: false,
-          };
-          setCurrentToast(toastData);
-          setNotifications((prev) => [toastData, ...prev.slice(0, 20)]);
-
-          onOrdersChanged();
+    const interval = setInterval(async () => {
+      try {
+        if (typeof onOrdersChanged === "function") {
+          await onOrdersChanged();
         }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "orders" },
-        (payload) => {
-          const updatedOrder = payload.new;
-          if (!updatedOrder) return;
+      } catch (err) {
+        console.warn("Live order refresh notice:", err?.message);
+      }
+    }, 5000);
 
-          const toastData = {
-            id: Date.now(),
-            title: "Order Status Updated",
-            message: `${formatOrderId(updatedOrder)} status changed to ${updatedOrder.status}`,
-            order: updatedOrder,
-            time: new Date(),
-            read: false,
-          };
-          setNotifications((prev) => [toastData, ...prev.slice(0, 20)]);
+    return () => clearInterval(interval);
+  }, [onOrdersChanged, orders.length]);
 
-          onOrdersChanged();
-        }
-      )
-      .subscribe();
+  // Notify on new incoming orders
+  useEffect(() => {
+    if (!orders || orders.length === 0) return;
+    const latestOrder = orders[0];
+    const latestKey = latestOrder.id || latestOrder._id || latestOrder.order_id;
+    const storedLatest = sessionStorage.getItem("foodworld-last-seen-order");
 
-    return () => {
-      supabase.removeChannel(ordersChannel);
-    };
-  }, [onOrdersChanged]);
+    if (storedLatest && storedLatest !== String(latestKey)) {
+      if (typeof window !== "undefined" && localStorage.getItem("foodworld-sound") !== "disabled") {
+        playNotificationSound();
+      }
+
+      const toastData = {
+        id: Date.now(),
+        title: "New Order Placed!",
+        message: `Order ${formatOrderId(latestOrder)} from ${latestOrder.customer_name || "Guest"}`,
+        amount: latestOrder.total_amount || latestOrder.total,
+        order: latestOrder,
+        time: new Date(),
+        read: false,
+      };
+      setCurrentToast(toastData);
+      setNotifications((prev) => [toastData, ...prev.slice(0, 20)]);
+    }
+
+    if (latestKey) {
+      sessionStorage.setItem("foodworld-last-seen-order", String(latestKey));
+    }
+  }, [orders]);
 
   const stats = useMemo(() => {
     // Only count completed/delivered orders for revenue — matches SalesAnalytics
@@ -387,54 +382,69 @@ function OwnerDashboard({
     ].reverse(); // restore recency order for display
   }, [normalizedOrdersList]);
 
-  const saveProduct = async (form) => {
-    setSaving(true);
-    setNotice("");
-    const payload = {
-      name: form.name || form.title,
-      price: Number(form.price),
-      image: form.image || "",
-      category: form.category || "Burger",
-      description: form.description || "",
-      stock_quantity: Number(form.stock_quantity || 0),
-      low_stock_threshold: Number(form.low_stock_threshold || 5),
-      is_available: Boolean(form.is_available !== false),
-    };
+const saveProduct = async (form) => {
+  setSaving(true);
+  setNotice("");
 
-    const { error } = form.id
-      ? await supabase.from("products").update(payload).eq("id", form.id)
-      : await supabase.from("products").insert([payload]);
+  const payload = {
+    name: form.name || form.title,
+    title: form.title || form.name,
+    price: Number(form.price),
+    image: form.image || "",
+    category: form.category || "Burger",
+    description: form.description || "",
+    stock_quantity: Number(form.stock_quantity || 0),
+    low_stock_threshold: Number(form.low_stock_threshold || 5),
+    is_available: Boolean(form.is_available !== false),
+  };
 
-    if (error) {
-      setNotice(`Notice: ${error.message}. Changes reflected locally.`);
+  try {
+    if (form.id) {
+      await updateProduct(form.id, payload);
+      setNotice("Product updated successfully in catalog.");
     } else {
-      setNotice(form.id ? "Product updated successfully in catalog." : "New product added successfully to catalog.");
+      await createProduct(payload);
+      setNotice("New product added successfully to catalog.");
     }
 
     setModalProduct(null);
-    onProductsChanged();
+    await onProductsChanged();
+  } catch (error) {
+    console.error("Product save error:", error);
+    setNotice(`Notice: ${error.message}`);
+  } finally {
     setSaving(false);
-  };
+  }
+};
 
-  const deleteProduct = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product/drink from the catalog?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      setNotice(`Note: ${error.message}`);
-    } else {
-      setNotice("Product deleted from catalog.");
-    }
-    onProductsChanged();
-  };
+const deleteProduct = async (id) => {
+  if (
+    !window.confirm(
+      "Are you sure you want to delete this product/drink from the catalog?"
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await deleteProductFromMongo(id);
+
+    setNotice("Product deleted from catalog.");
+    await onProductsChanged();
+  } catch (error) {
+    console.error("Product delete error:", error);
+    setNotice(`Note: ${error.message}`);
+  }
+};
 
   const updateOrderStatus = async (id, status) => {
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    if (error) {
-      setNotice(`Update notice: ${error.message}`);
-    } else {
+    try {
+      await updateOrderStatusApi(id, status);
       setNotice(`Order #${id} status updated to ${status}.`);
+      onOrdersChanged();
+    } catch (error) {
+      setNotice(`Update notice: ${error.message}`);
     }
-    onOrdersChanged();
   };
 
   const title = navItems.find((item) => item.id === section)?.label || "Overview";

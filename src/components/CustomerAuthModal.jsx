@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, LogIn, UserPlus, Eye, EyeOff, User } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { signIn, signUp } from '../services/apiClient';
 
 /**
  * CustomerAuthModal
@@ -12,6 +12,7 @@ function CustomerAuthModal({ onClose, onAuthenticated }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,51 +27,34 @@ function CustomerAuthModal({ onClose, onAuthenticated }) {
       return;
     }
     setLoading(true);
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    setLoading(false);
-    if (authError) {
-      setError(authError.message || 'Sign in failed. Please check your credentials.');
-      return;
-    }
-    onAuthenticated(data.user);
-    onClose();
+    try {
+      const data = await signIn(email.trim(), password);
+      onAuthenticated(data.user);
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Sign in failed. Please check your credentials.');
+    } finally { setLoading(false); }
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
-    if (!email.trim() || !password) {
-      setError('Please enter your email and password.');
+    if (!email.trim() || !password || !name.trim() || !phone.trim()) {
+      setError('Please enter your name, phone number, email, and password.');
       return;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
       return;
     }
     setLoading(true);
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: { full_name: name.trim() || '' },
-      },
-    });
-    setLoading(false);
-    if (authError) {
-      setError(authError.message || 'Sign up failed. Please try again.');
-      return;
-    }
-    // If email confirmation is enabled, session may be null
-    if (data?.session) {
+    try {
+      const data = await signUp({ name: name.trim(), phone: phone.trim(), email: email.trim(), password });
       onAuthenticated(data.user);
       onClose();
-    } else {
-      setSuccessMsg('Account created! Please check your email to confirm your account, then sign in.');
-    }
+    } catch (err) { setError(err.message || 'Sign up failed. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -110,7 +94,7 @@ function CustomerAuthModal({ onClose, onAuthenticated }) {
           {mode === 'signup' && (
             <label className="block">
               <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                Your Name (optional)
+                Your Name
               </span>
               <div className="relative mt-1.5">
                 <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />

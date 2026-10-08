@@ -14,7 +14,8 @@ import {
   Receipt,
   AlertCircle,
 } from "lucide-react";
-import { supabase } from "../supabaseClient";
+import { signIn } from "../services/apiClient";
+import { selectRestaurantForUser } from "../services/productService";
 
 function OwnerLogin({ onLoggedIn, onBack }) {
   const [email, setEmail] = useState("");
@@ -34,20 +35,19 @@ function OwnerLogin({ onLoggedIn, onBack }) {
     setError("");
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (authError) {
-        setError(authError.message || "Failed to sign in. Please check your credentials.");
-      } else if (data?.user) {
-        onLoggedIn(data.user);
+      const session = await signIn(email.trim(), password);
+      if (session?.user) {
+        try {
+          await selectRestaurantForUser(session.user);
+        } catch {
+          // It's ok if restaurant selection uses default
+        }
+        onLoggedIn(session.user);
       } else {
-        setError("Sign in failed. Please try again.");
+        setError("Sign in failed. Please check your credentials.");
       }
     } catch (err) {
-      setError(err?.message || "An unexpected network error occurred.");
+      setError(err?.message || "Failed to sign in. Please verify your credentials.");
     } finally {
       setLoading(false);
     }
@@ -266,7 +266,7 @@ function OwnerLogin({ onLoggedIn, onBack }) {
             {/* Bottom Footer & Store Return */}
             <div className="mt-8 border-t border-coal-800/80 pt-5 text-center text-xs text-zinc-500">
               <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
-                <p>Protected by Food World Supabase Auth</p>
+                <p>Protected by Food World Enterprise Auth</p>
                 {onBack && (
                   <button
                     type="button"

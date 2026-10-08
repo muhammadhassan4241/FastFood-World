@@ -9,12 +9,13 @@ import OwnerLogin from "./components/OwnerLogin";
 import OwnerDashboard from "./components/OwnerDashboard";
 import OrderTrackingPage from "./components/OrderTrackingPage";
 import CustomerAuthModal from "./components/CustomerAuthModal";
-import { supabase } from "./supabaseClient";
+import { getSession, signOut as apiSignOut } from "./services/apiClient";
+import { fetchOrders as fetchOrdersFromBackend, placeOrder as placeOrderToBackend } from "./services/orderService";
 import { normalizeOrder } from "./utils/orderUtils";
 import { useRatings } from "./hooks/useRatings";
 import { countReviews, getAverageRating } from "./data/productRating.js";
+import { fetchProducts as fetchProductsFromMongo, updateProductStock } from "./services/productService";
 
-import { products as defaultProducts } from "./data/Product";
 
 function App() {
   const [page, setPage] = useState("home");
@@ -30,7 +31,7 @@ function App() {
   });
   const [cartOpen, setCartOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
-  const [productsList, setProductsList] = useState(defaultProducts);
+  const [productsList, setProductsList] = useState([]);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
@@ -50,43 +51,35 @@ function App() {
     return summaries;
   }, {});
 
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase.from("products").select("*").order("id");
-      if (error) {
-        console.warn("Error fetching products from database:", error.message);
-        setProductsList(defaultProducts);
-      } else if (!data || data.length === 0) {
-        setProductsList(defaultProducts);
-      } else {
-        // If remote database doesn't yet have Drinks category, merge default drinks so storefront and POS are never missing drinks
-        const hasDrinks = data.some((p) => (p.category || "").toLowerCase() === "drinks");
-        if (!hasDrinks) {
-          const defaultDrinks = defaultProducts.filter((p) => p.category === "Drinks");
-          setProductsList([...data, ...defaultDrinks]);
-        } else {
-          setProductsList(data);
-        }
-      }
-    } catch (err) {
-      console.error("fetchProducts error:", err);
-      setProductsList(defaultProducts);
+const fetchProducts = async () => {
+  try {
+    const data = await fetchProductsFromMongo();
+
+    if (!data || data.length === 0) {
+      setProductsList([]);
+      return;
     }
-  };
+
+    const normalizedProducts = data.map((product) => ({
+      ...product,
+      id: product._id,
+    }));
+
+    setProductsList(normalizedProducts);
+  } catch (err) {
+    console.error("Error fetching products from MongoDB:", err);
+    setProductsList([]);
+  }
+};
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
     setOrdersError("");
     try {
-      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-      if (error) {
-        console.error("Error fetching orders:", error);
-        setOrdersError(error.message || "Could not fetch orders.");
-      } else {
-        setOrders(data || []);
-      }
+      const data = await fetchOrdersFromBackend();
+      setOrders(data || []);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Error fetching orders from backend:", error);
       setOrdersError(error?.message || "Could not fetch orders.");
     } finally {
       setOrdersLoading(false);
@@ -97,10 +90,10 @@ function App() {
     const load = async () => {
       setLoading(true);
       await Promise.all([fetchProducts(), fetchOrders(), fetchReviews()]);
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        setCustomer(data.session.user);
-        setOwner(data.session.user);
+      const session = getSession();
+      if (session?.user) {
+        setCustomer(session.user);
+        setOwner(session.user);
       }
 
       // Check if URL contains ?tracking=FW-XXXX or ?order_id=...
@@ -116,11 +109,6 @@ function App() {
       setLoading(false);
     };
     load();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCustomer(session?.user || null);
-      setOwner(session?.user || null);
-    });
-    return () => listener.subscription?.unsubscribe();
   }, [fetchReviews]);
 
   useEffect(() => {
@@ -185,88 +173,42 @@ function App() {
   }, 0);
 
   /**
-   * Resilient order placement that safely inserts into Supabase
-   * and clears the cart ONLY upon verified database success.
+   * Order placement that sends order to backend API and MongoDB
+   * and clears the cart upon verified database success.
    */
   const handlePlaceOrder = async (details) => {
-    const richItemsContainer = {
+    const orderPayload = {
       order_id: details.order_id,
-      items: details.items,
-      subtotal: details.subtotal,
-      delivery_fee: details.delivery_fee,
-      tax: details.tax,
-      discount: details.discount || 0,
-      customer_email: details.customer_email || "",
-      special_instructions: details.special_instructions || "",
-      payment_method: details.payment_method || "cod",
-      customer_name: details.customer_name || "Guest",
-      mobile: details.mobile || "N/A",
-      address: details.address || "N/A",
-      total_amount: details.total_amount || 0,
-    };
-
-    // Primary payload targeting full schema
-    const fullPayload = {
-      order_id: details.order_id,
+      orderNumber: details.order_id,
       customer_name: details.customer_name || "Guest",
       mobile: details.mobile || "N/A",
       customer_phone: details.mobile || "N/A",
-      customer_email: details.customer_email || null,
+      customer_email: details.customer_email || "",
       address: details.address || "N/A",
-      special_instructions: details.special_instructions || null,
-      items: richItemsContainer,
+      special_instructions: details.special_instructions || "",
+      notes: details.special_instructions || "",
+      items: details.items || [],
       subtotal: details.subtotal || 0,
       delivery_fee: details.delivery_fee || 150,
       tax: details.tax || 0,
       discount: details.discount || 0,
       total_amount: details.total_amount || 0,
+      total: details.total_amount || 0,
       payment_method: details.payment_method || "cod",
       status: "pending",
-    };
-
-    // Fallback payload targeting standard base schema (no extra columns)
-    const basePayload = {
-      customer_name: details.customer_name || "Guest",
-      mobile: details.mobile || "N/A",
-      address: details.address || "N/A",
-      total_amount: details.total_amount || 0,
-      items: richItemsContainer,
-      status: "pending",
+      orderStatus: "pending",
     };
 
     let savedData = null;
-    let insertionError = null;
-
-    // Attempt 1: Try inserting with full schema
-    const { data: d1, error: e1 } = await supabase
-      .from("orders")
-      .insert([fullPayload])
-      .select()
-      .single();
-
-    if (!e1 && d1) {
-      savedData = d1;
-    } else {
-      console.warn("Full payload insertion error, attempting base payload fallback:", e1?.message);
-      // Attempt 2: Fallback to existing columns schema (embeds order_id in items JSON)
-      const { data: d2, error: e2 } = await supabase
-        .from("orders")
-        .insert([basePayload])
-        .select()
-        .single();
-
-      if (!e2 && d2) {
-        savedData = d2;
-      } else {
-        insertionError = e2 || e1;
-      }
+    try {
+      savedData = await placeOrderToBackend(orderPayload);
+    } catch (err) {
+      console.error("Order insertion failed:", err);
+      throw new Error(err?.message || "Failed to place order.");
     }
 
-    if (insertionError || !savedData) {
-      console.error("Order insertion failed completely:", insertionError);
-      // DO NOT clear cart on failure
-      const errorMsg = insertionError?.message || "Database insert failed";
-      throw new Error(errorMsg);
+    if (!savedData) {
+      throw new Error("Server did not return a valid order confirmation.");
     }
 
     // ONLY on successful database insertion:
@@ -277,37 +219,57 @@ function App() {
     // 3. Refresh orders from database
     await fetchOrders();
 
-    // 4. Decrement stock for ordered items
+    // 4. Decrement stock for ordered items in MongoDB
     try {
       for (const item of details.items || []) {
         const prodId = item.id || item.productId;
-        const product = productsList.find((p) => p.id === prodId);
+
+        const product = productsList.find(
+          (p) => String(p.id) === String(prodId)
+        );
+
         if (product && product.stock_quantity != null) {
-          const newStock = Math.max(0, Number(product.stock_quantity) - Number(item.quantity || 1));
-          const update = { stock_quantity: newStock };
-          if (newStock === 0) update.is_available = false;
-          await supabase.from("products").update(update).eq("id", product.id);
+          const newStock = Math.max(
+            0,
+            Number(product.stock_quantity) - Number(item.quantity || 1)
+          );
+
+          await updateProductStock(
+            product.id,
+            newStock,
+            newStock > 0
+          );
         }
 
-        // If item has a drink combo, also decrement the drink product's stock
+        // Drink combo stock
         if (item.drink && item.drink.id) {
-          const drinkProduct = productsList.find((p) => p.id === item.drink.id);
+          const drinkProduct = productsList.find(
+            (p) => String(p.id) === String(item.drink.id)
+          );
+
           if (drinkProduct && drinkProduct.stock_quantity != null) {
-            const drinkNewStock = Math.max(0, Number(drinkProduct.stock_quantity) - Number(item.quantity || 1));
-            const drinkUpdate = { stock_quantity: drinkNewStock };
-            if (drinkNewStock === 0) drinkUpdate.is_available = false;
-            await supabase.from("products").update(drinkUpdate).eq("id", drinkProduct.id);
+            const drinkNewStock = Math.max(
+              0,
+              Number(drinkProduct.stock_quantity) -
+                Number(item.quantity || 1)
+            );
+
+            await updateProductStock(
+              drinkProduct.id,
+              drinkNewStock,
+              drinkNewStock > 0
+            );
           }
         }
       }
+
       await fetchProducts();
     } catch (stockErr) {
-      console.warn("Stock decrement warning:", stockErr);
+      console.warn("MongoDB stock decrement warning:", stockErr);
     }
 
     // 5. Return normalized order with the real saved database ID & human readable order_id
     const normalized = normalizeOrder(savedData, productsList);
-    // Ensure the generated order_id from client is preserved if DB column didn't store it
     if (!normalized.order_id || normalized.order_id === "FW-00000") {
       normalized.order_id = details.order_id;
     }
@@ -331,13 +293,13 @@ function App() {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await apiSignOut();
     setOwner(null);
     setPage("home");
   };
 
   const handleCustomerSignOut = async () => {
-    await supabase.auth.signOut();
+    await apiSignOut();
     setCustomer(null);
   };
 

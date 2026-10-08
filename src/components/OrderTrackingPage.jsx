@@ -17,7 +17,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { supabase } from "../supabaseClient";
+import { trackOrder, searchOrders } from "../services/orderService";
 import {
   formatCurrency,
   formatDateTime,
@@ -85,89 +85,25 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
     }
 
     try {
-      // 1. If numeric e.g. "12" or extracted from "FW-00012"
-      let numericId = null;
-      if (/^\d+$/.test(raw)) {
-        numericId = Number(raw);
-      } else if (raw.toUpperCase().startsWith("FW-")) {
-        const afterPrefix = raw.slice(3);
-        if (/^\d+$/.test(afterPrefix)) {
-          numericId = Number(afterPrefix);
+      // 1. Try directly tracking by Order Number / ID
+      try {
+        const found = await trackOrder(raw);
+        if (found) {
+          const normalized = normalizeOrder(found, products);
+          return { order: normalized, error: "" };
         }
+      } catch {
+        // Continue to search endpoint
       }
 
-      // Query database
-      let fetchedRows = [];
-
-      if (numericId !== null) {
-        const { data: idData, error: idError } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("id", numericId)
-          .limit(1);
-
-        if (!idError && idData && idData.length > 0) {
-          fetchedRows = idData;
-        }
-      }
-
-      // If not found by primary key ID, search by customer_name or mobile
-      if (fetchedRows.length === 0) {
-        const { data: searchData, error: searchError } = await supabase
-          .from("orders")
-          .select("*")
-          .or(`mobile.ilike.%${raw}%,customer_name.ilike.%${raw}%`)
-          .order("created_at", { ascending: false })
-          .limit(10);
-
-        if (!searchError && searchData && searchData.length > 0) {
-          fetchedRows = searchData;
-        }
-      }
-
-      // If not found by name/phone, try looking up the order_id text column directly
-      // This covers FW-XXXXX lookups across ALL orders, not just recent 50
-      if (fetchedRows.length === 0) {
-        const { data: orderIdColData, error: orderIdColError } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("order_id", raw.toUpperCase())
-          .limit(1);
-
-        if (!orderIdColError && orderIdColData && orderIdColData.length > 0) {
-          fetchedRows = orderIdColData;
-        }
-      }
-
-      // Also try fetching recent orders to match embedded order_id in items JSON
-      // (legacy fallback for old orders created before order_id column was added)
-      if (fetchedRows.length === 0) {
-        const { data: recentOrders, error: recentError } = await supabase
-          .from("orders")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        if (!recentError && recentOrders) {
-          const match = recentOrders.find((ord) => {
-            const ordId = formatOrderId(ord);
-            return (
-              ordId.toLowerCase() === raw.toLowerCase() ||
-              (ord.items && typeof ord.items === "object" && ord.items.order_id === raw)
-            );
-          });
-          if (match) {
-            fetchedRows = [match];
-          }
-        }
-      }
-
-      if (fetchedRows.length > 0) {
-        const normalized = normalizeOrder(fetchedRows[0], products);
+      // 2. Search by phone, name, or order id
+      const matches = await searchOrders(raw);
+      if (matches && matches.length > 0) {
+        const normalized = normalizeOrder(matches[0], products);
         return { order: normalized, error: "" };
-      } else {
-        return { order: null, error: "Order not found. Please check your Order ID." };
       }
+
+      return { order: null, error: "Order not found. Please check your Order ID or phone number." };
     } catch (err) {
       console.error("Order lookup error:", err);
       return {
@@ -202,32 +138,24 @@ function OrderTrackingPage({ products = [], initialOrderId = "", goToMenu }) {
     };
   }, [initialOrderId, performSearch]);
 
-  // Subscribe to real-time status updates for the actively tracked order
+  // Live status refresh for the actively tracked order
   useEffect(() => {
-    if (!currentOrder?.id) return;
+    const orderKey = currentOrder?.order_id || currentOrder?.orderNumber || currentOrder?.id;
+    if (!orderKey) return;
 
-    const channel = supabase
-      .channel(`tracking-order-${currentOrder.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "orders",
-          filter: `id=eq.${currentOrder.id}`,
-        },
-        (payload) => {
-          if (payload.new) {
-            setCurrentOrder((prev) => normalizeOrder({ ...prev, ...payload.new }, products));
-          }
+    const interval = setInterval(async () => {
+      try {
+        const updated = await trackOrder(orderKey);
+        if (updated) {
+          setCurrentOrder(normalizeOrder(updated, products));
         }
-      )
-      .subscribe();
+      } catch {
+        // ignore polling error
+      }
+    }, 5000);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentOrder?.id, products]);
+    return () => clearInterval(interval);
+  }, [currentOrder?.id, currentOrder?.orderNumber, currentOrder?.order_id, products]);
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();

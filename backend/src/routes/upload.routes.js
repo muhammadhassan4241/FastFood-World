@@ -1,0 +1,2 @@
+const router = require("express").Router(); const controller = require("../controllers/upload.controller"); const { authenticate } = require("../middleware/auth.middleware"); const { authorize } = require("../middleware/role.middleware"); const { upload, uploadError } = require("../middleware/upload.middleware");
+router.post("/image", authenticate, authorize("restaurant_admin", "super_admin"), upload.single("image"), uploadError, controller.image); module.exports = router;

@@ -1,23 +1,29 @@
-import { supabase } from "../supabaseClient";
+import { apiRequest } from "./apiClient";
 
-// Fetch every review row from Supabase, shaped to match the
-// { productid, rating } format used by src/data/Product-Rating.js
+// Fetch every review from MongoDB backend, shaped to match
+// the { productid, rating } format used by ratings calculations
 export async function fetchReviewsFromDB() {
-  const { data, error } = await supabase.from("reviews").select("*");
-  if (error) throw error;
-  return (data || []).map((row) => ({
-    productid: row.product_id,
-    rating: Number(row.rating) || 0,
-  }));
+  try {
+    const data = await apiRequest("/reviews", { token: null });
+    return (data || []).map((row) => ({
+      productid: row.productId || row.product_id || row.menuItem,
+      rating: Number(row.rating) || 0,
+      comment: row.comment || "",
+      customer_name: row.customer_name || "Customer",
+    }));
+  } catch (error) {
+    console.warn("Could not fetch reviews from backend:", error.message);
+    return [];
+  }
 }
 
-// Insert a single customer review into the "reviews" table
+// Insert a single customer review into MongoDB backend
 export async function insertReview(productId, rating, comment) {
   const payload = {
-    product_id: productId,
-    rating,
+    productId: String(productId),
+    product_id: String(productId),
+    rating: Number(rating),
     comment: comment?.trim() || null,
   };
-  const { error } = await supabase.from("reviews").insert([payload]);
-  if (error) throw error;
+  return apiRequest("/reviews", { method: "POST", body: payload });
 }
