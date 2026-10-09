@@ -38,18 +38,18 @@ function CheckoutPage({
   const [email, setEmail] = useState(() => customer?.email || "");
 
   useEffect(() => {
-    if (customer) {
-      if (!name && customer.user_metadata?.full_name) {
-        setName(customer.user_metadata.full_name);
-      }
-      if (!email && customer.email) {
-        setEmail(customer.email);
-      }
-      if (!phone && customer.user_metadata?.phone) {
-        setPhone(customer.user_metadata.phone);
-      }
+    if (!customer) return;
+
+    if (!name && customer.user_metadata?.full_name) {
+      setName(customer.user_metadata.full_name);
     }
-  }, [customer]);
+    if (!email && customer.email) {
+      setEmail(customer.email);
+    }
+    if (!phone && customer.user_metadata?.phone) {
+      setPhone(customer.user_metadata.phone);
+    }
+  }, [customer, email, name, phone]);
   const [address, setAddress] = useState("");
   const [instructions, setInstructions] = useState("");
   const [payment, setPayment] = useState("cod");

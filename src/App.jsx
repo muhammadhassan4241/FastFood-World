@@ -14,7 +14,7 @@ import { fetchOrders as fetchOrdersFromBackend, placeOrder as placeOrderToBacken
 import { normalizeOrder } from "./utils/orderUtils";
 import { useRatings } from "./hooks/useRatings";
 import { countReviews, getAverageRating } from "./data/productRating.js";
-import { fetchProducts as fetchProductsFromMongo, updateProductStock } from "./services/productService";
+import { fetchProducts as fetchProductsFromMongo } from "./services/productService";
 
 
 function App() {
@@ -40,6 +40,24 @@ function App() {
   const [owner, setOwner] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [customerAuthOpen, setCustomerAuthOpen] = useState(false);
+
+  const applySessionUser = (user) => {
+    if (!user) {
+      setOwner(null);
+      setCustomer(null);
+      return;
+    }
+
+    const role = user.role || "customer";
+    if (role === "restaurant_admin" || role === "super_admin") {
+      setOwner(user);
+      setCustomer(null);
+      return;
+    }
+
+    setOwner(null);
+    setCustomer(user);
+  };
   const [theme, setTheme] = useState(() =>
     typeof window !== "undefined" ? localStorage.getItem("theme") || "dark" : "dark"
   );
@@ -92,8 +110,7 @@ const fetchProducts = async () => {
       await Promise.all([fetchProducts(), fetchOrders(), fetchReviews()]);
       const session = getSession();
       if (session?.user) {
-        setCustomer(session.user);
-        setOwner(session.user);
+        applySessionUser(session.user);
       }
 
       // Check if URL contains ?tracking=FW-XXXX or ?order_id=...
@@ -122,26 +139,21 @@ const fetchProducts = async () => {
 
   const addToCart = (productIdOrKey, selectedDrink = null) => {
     setCart((prev) => {
-      let key = String(productIdOrKey);
-      let prodId = Number(key.split("_")[0]);
-      let drink = selectedDrink;
-
-      if (!selectedDrink && key.includes("_drink_")) {
-        const drinkId = Number(key.split("_drink_")[1]);
-        drink = prev[key]?.drink || productsList.find((p) => p.id === drinkId) || null;
-      } else if (selectedDrink) {
-        key = `${prodId}_drink_${selectedDrink.id}`;
-      }
-
-      const currentItem = prev[key];
+      const rawKey = String(productIdOrKey);
+      const baseProductId = rawKey.includes("_drink_") ? rawKey.split("_drink_")[0] : rawKey;
+      const productId = String(baseProductId);
+      const drinkId = selectedDrink?.id ?? (rawKey.includes("_drink_") ? rawKey.split("_drink_")[1] : null);
+      const resolvedKey = selectedDrink ? `${productId}_drink_${selectedDrink.id}` : rawKey;
+      const currentItem = prev[resolvedKey];
       const currentQty = typeof currentItem === "number" ? currentItem : currentItem?.quantity || 0;
+      const resolvedDrink = selectedDrink || (currentItem?.drink ?? (drinkId ? productsList.find((p) => String(p.id) === String(drinkId)) ?? null : null));
 
       return {
         ...prev,
-        [key]: {
-          productId: prodId,
+        [resolvedKey]: {
+          productId,
           quantity: currentQty + 1,
-          drink: drink || currentItem?.drink || null,
+          drink: resolvedDrink || null,
         },
       };
     });
@@ -177,6 +189,11 @@ const fetchProducts = async () => {
    * and clears the cart upon verified database success.
    */
   const handlePlaceOrder = async (details) => {
+    const items = Array.isArray(details?.items) ? details.items : [];
+    if (!items.length) {
+      throw new Error("Your cart is empty.");
+    }
+
     const orderPayload = {
       order_id: details.order_id,
       orderNumber: details.order_id,
@@ -187,7 +204,7 @@ const fetchProducts = async () => {
       address: details.address || "N/A",
       special_instructions: details.special_instructions || "",
       notes: details.special_instructions || "",
-      items: details.items || [],
+      items,
       subtotal: details.subtotal || 0,
       delivery_fee: details.delivery_fee || 150,
       tax: details.tax || 0,
@@ -199,76 +216,60 @@ const fetchProducts = async () => {
       orderStatus: "pending",
     };
 
-    let savedData = null;
+    let savedData;
     try {
       savedData = await placeOrderToBackend(orderPayload);
     } catch (err) {
       console.error("Order insertion failed:", err);
-      throw new Error(err?.message || "Failed to place order.");
+      throw new Error(err?.message || "Failed to place order.", { cause: err });
     }
 
     if (!savedData) {
       throw new Error("Server did not return a valid order confirmation.");
     }
 
-    // ONLY on successful database insertion:
-    // 1. Clear cart state
     setCart({});
-    // 2. Clear localStorage
     localStorage.removeItem("foodworld-cart");
-    // 3. Refresh orders from database
     await fetchOrders();
 
-    // 4. Decrement stock for ordered items in MongoDB
     try {
-      for (const item of details.items || []) {
-        const prodId = item.id || item.productId;
+      setProductsList((prevProducts) =>
+        prevProducts.map((product) => {
+          const matchedItem = items.find((item) => String(item.id || item.productId) === String(product.id));
+          if (!matchedItem) return product;
 
-        const product = productsList.find(
-          (p) => String(p.id) === String(prodId)
+          const qtyToReduce = Number(matchedItem.quantity || 1);
+          const nextStock = Math.max(0, Number(product.stock_quantity ?? 0) - qtyToReduce);
+          return {
+            ...product,
+            stock_quantity: nextStock,
+            is_available: nextStock > 0,
+          };
+        })
+      );
+
+      if (items.some((item) => item.drink && item.drink.id)) {
+        setProductsList((prevProducts) =>
+          prevProducts.map((product) => {
+            const drinkItem = items.find((item) => item.drink && String(item.drink.id) === String(product.id));
+            if (!drinkItem) return product;
+
+            const qtyToReduce = Number(drinkItem.quantity || 1);
+            const nextStock = Math.max(0, Number(product.stock_quantity ?? 0) - qtyToReduce);
+            return {
+              ...product,
+              stock_quantity: nextStock,
+              is_available: nextStock > 0,
+            };
+          })
         );
-
-        if (product && product.stock_quantity != null) {
-          const newStock = Math.max(
-            0,
-            Number(product.stock_quantity) - Number(item.quantity || 1)
-          );
-
-          await updateProductStock(
-            product.id,
-            newStock,
-            newStock > 0
-          );
-        }
-
-        // Drink combo stock
-        if (item.drink && item.drink.id) {
-          const drinkProduct = productsList.find(
-            (p) => String(p.id) === String(item.drink.id)
-          );
-
-          if (drinkProduct && drinkProduct.stock_quantity != null) {
-            const drinkNewStock = Math.max(
-              0,
-              Number(drinkProduct.stock_quantity) -
-                Number(item.quantity || 1)
-            );
-
-            await updateProductStock(
-              drinkProduct.id,
-              drinkNewStock,
-              drinkNewStock > 0
-            );
-          }
-        }
       }
 
       await fetchProducts();
     } catch (stockErr) {
-      console.warn("MongoDB stock decrement warning:", stockErr);
+      console.warn("Local stock update warning:", stockErr);
     }
 
-    // 5. Return normalized order with the real saved database ID & human readable order_id
     const normalized = normalizeOrder(savedData, productsList);
     if (!normalized.order_id || normalized.order_id === "FW-00000") {
       normalized.order_id = details.order_id;

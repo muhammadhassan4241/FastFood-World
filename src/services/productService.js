@@ -3,7 +3,19 @@ import { apiRequest, getSession } from "./apiClient";
 const RESTAURANT_KEY = "foodworld-restaurant-id";
 let activeRestaurantId = localStorage.getItem(RESTAURANT_KEY) || "";
 
-const normalizeProduct = (item) => ({ ...item, id: item.id || item._id, title: item.name, category: typeof item.category === "object" ? item.category?.name || "Other" : "Other", is_available: item.isAvailable !== false, stock_quantity: item.isAvailable === false ? 0 : 99, low_stock_threshold: 5 });
+const normalizeProduct = (item) => {
+  const stockValue = Number(item?.stock_quantity ?? item?.quantity ?? item?.count ?? 99);
+
+  return {
+    ...item,
+    id: item.id || item._id,
+    title: item.name,
+    category: typeof item.category === "object" ? item.category?.name || "Other" : "Other",
+    is_available: item.isAvailable !== false,
+    stock_quantity: Number.isFinite(stockValue) ? stockValue : 99,
+    low_stock_threshold: item.low_stock_threshold ?? 5,
+  };
+};
 
 export function getActiveRestaurantId() { return activeRestaurantId; }
 export function setActiveRestaurantId(id) { activeRestaurantId = id || ""; if (id) localStorage.setItem(RESTAURANT_KEY, id); else localStorage.removeItem(RESTAURANT_KEY); }
@@ -24,4 +36,10 @@ function toMenuPayload(product, category) { return { category, name: product.nam
 export async function createProduct(product) { const id = await restaurantId(); const category = await categoryIdFor(product.category); const data = await apiRequest(`/restaurants/${id}/menu`, { method: "POST", body: toMenuPayload(product, category) }); return normalizeProduct(data.menuItem); }
 export async function updateProduct(id, product) { const category = await categoryIdFor(product.category); const data = await apiRequest(`/menu/${id}`, { method: "PATCH", body: toMenuPayload(product, category) }); return normalizeProduct(data.menuItem); }
 export async function deleteProduct(id) { return apiRequest(`/menu/${id}`, { method: "DELETE" }); }
-export async function updateProductStock(id, stockQuantity, isAvailable) { return apiRequest(`/menu/${id}/availability`, { method: "PATCH", body: { isAvailable: Boolean(isAvailable && stockQuantity > 0) } }); }
+export async function updateProductStock(id, stockQuantity, isAvailable) {
+  const quantity = Number(stockQuantity ?? 0);
+  return apiRequest(`/menu/${id}/availability`, {
+    method: "PATCH",
+    body: { isAvailable: Boolean(isAvailable && quantity > 0) },
+  });
+}

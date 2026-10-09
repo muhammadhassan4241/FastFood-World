@@ -302,8 +302,6 @@ function OwnerDashboard({
 
   // Live polling & order tracking for incoming orders
   useEffect(() => {
-    let lastOrderCount = orders.length;
-
     const interval = setInterval(async () => {
       try {
         if (typeof onOrdersChanged === "function") {

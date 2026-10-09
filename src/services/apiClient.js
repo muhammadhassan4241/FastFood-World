@@ -2,10 +2,17 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api
 const SESSION_KEY = "foodworld-api-session";
 
 export function getSession() {
+  if (typeof window === "undefined") return null;
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { return null; }
 }
-export function saveSession(session) { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); }
-export function clearSession() { localStorage.removeItem(SESSION_KEY); }
+export function saveSession(session) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+export function clearSession() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(SESSION_KEY);
+}
 
 export async function apiRequest(path, { method = "GET", body, token = getSession()?.accessToken, headers = {} } = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, { method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...headers }, body: body ? JSON.stringify(body) : undefined });

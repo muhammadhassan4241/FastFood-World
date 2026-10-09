@@ -8,6 +8,13 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true, trim: true, maxlength: 30 },
   role: { type: String, enum: ["customer", "restaurant_admin", "super_admin"], default: "customer", index: true },
   isActive: { type: Boolean, default: true, index: true },
+  addresses: [{
+    label: { type: String, default: "Home" },
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    postalCode: { type: String, default: "" },
+    isDefault: { type: Boolean, default: false },
+  }],
   tokenVersion: { type: Number, default: 0, select: false },
 }, { timestamps: true, toJSON: { virtuals: true, transform: (doc, ret) => { delete ret.password; delete ret.tokenVersion; delete ret.__v; return ret; } } });
 

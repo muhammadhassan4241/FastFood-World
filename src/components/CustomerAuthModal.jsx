@@ -92,21 +92,36 @@ function CustomerAuthModal({ onClose, onAuthenticated }) {
           className="px-6 py-6 space-y-4"
         >
           {mode === 'signup' && (
-            <label className="block">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                Your Name
-              </span>
-              <div className="relative mt-1.5">
-                <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <>
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Your Name
+                </span>
+                <div className="relative mt-1.5">
+                  <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Ali Hassan"
+                    className="w-full rounded-xl border border-coal-200 bg-coal-50 py-2.5 pl-9 pr-3.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
+                  />
+                </div>
+              </label>
+
+              <label className="block">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Phone Number
+                </span>
                 <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Ali Hassan"
-                  className="w-full rounded-xl border border-coal-200 bg-coal-50 py-2.5 pl-9 pr-3.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. +923001234567"
+                  className="mt-1.5 w-full rounded-xl border border-coal-200 bg-coal-50 px-3.5 py-2.5 text-sm font-medium text-zinc-900 outline-none transition focus:border-teal-500 dark:border-coal-700 dark:bg-coal-950 dark:text-white"
                 />
-              </div>
-            </label>
+              </label>
+            </>
           )}
 
           <label className="block">
