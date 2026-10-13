@@ -15,6 +15,7 @@ import { normalizeOrder } from "./utils/orderUtils";
 import { useRatings } from "./hooks/useRatings";
 import { countReviews, getAverageRating } from "./data/productRating.js";
 import { fetchProducts as fetchProductsFromMongo } from "./services/productService";
+import { products as fallbackProducts } from "./data/Product.js";
 
 
 function App() {
@@ -74,7 +75,7 @@ const fetchProducts = async () => {
     const data = await fetchProductsFromMongo();
 
     if (!data || data.length === 0) {
-      setProductsList([]);
+      setProductsList(fallbackProducts);
       return;
     }
 
@@ -86,7 +87,7 @@ const fetchProducts = async () => {
     setProductsList(normalizedProducts);
   } catch (err) {
     console.error("Error fetching products from MongoDB:", err);
-    setProductsList([]);
+    setProductsList(fallbackProducts);
   }
 };
 
